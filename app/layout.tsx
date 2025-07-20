@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import Navbar from "@/components/Navbar";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -19,10 +20,17 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${inter.variable} antialiased`}
-      >
-        {children}
+      <body className={`${inter.variable} antialiased`}>
+        <div className="relative flex flex-col h-screen ">
+          {children}
+          <div className="fixed bottom-8 left-0 right-0 z-10 pointer-events-none">
+            <div className="flex justify-center">
+              <div className="pointer-events-auto">
+                <Navbar />
+              </div>
+            </div>
+          </div>
+        </div>
       </body>
     </html>
   );
