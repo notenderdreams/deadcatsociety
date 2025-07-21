@@ -65,6 +65,7 @@
 **Table**: semesters
 - id (uuid)
 - name (e.g., "Semester 7")
+- is_active
 
 **Table**: courses
 - id (uuid)
