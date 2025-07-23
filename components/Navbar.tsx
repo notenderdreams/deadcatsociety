@@ -1,15 +1,15 @@
 "use client";
-import { Home, Fan, Bolt, Calendar, Sparkles, Notebook } from "lucide-react";
+
+import { Home, Fan, Bolt, Calendar, Notebook } from "lucide-react";
 import { ExpandedTabs } from "@/components/ui/expanded-tabs";
 
 function Navbar() {
   const tabs = [
-    { title: "Home", icon: Home, path: "/" },
-    { title: "Notes", icon: Notebook, path: "/projects" },
-    { title: "Askity", icon: Sparkles , path: "/crates" },
-    { title: "Events", icon: Calendar, path: "/crates" },
-    { title: "Settings", icon: Bolt, path: "/settings" },
-    { title: "About", icon: Fan, path: "/about" },
+    { title: "Home", icon: Home, route: "/" },
+    { title: "Notes", icon: Notebook, route: "/notes" },
+    { title: "Limi", icon: Fan, route: "/limi" },
+    { title: "Events", icon: Calendar, route: "/events" },
+    { title: "Settings", icon: Bolt, route: "/settings" },
   ];
 
   return (
@@ -20,4 +20,5 @@ function Navbar() {
     </div>
   );
 }
+
 export default Navbar;

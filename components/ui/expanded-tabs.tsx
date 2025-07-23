@@ -1,25 +1,19 @@
+"use client";
+
 import * as React from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import { LucideIcon } from "lucide-react";
-import { useOnClickOutside } from "usehooks-ts";
+import { useRouter, usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 interface Tab {
   title: string;
   icon: LucideIcon;
-  type?: never;
+  route: string;
 }
-
-interface Separator {
-  type: "separator";
-  title?: never;
-  icon?: never;
-}
-
-type TabItem = Tab | Separator;
 
 interface ExpandedTabsProps {
-  tabs: TabItem[];
+  tabs: Tab[];
   className?: string;
   activeColor?: string;
   onChange?: (index: number | null) => void;
@@ -49,38 +43,27 @@ export function ExpandedTabs({
   activeColor = "text-primary",
   onChange,
 }: ExpandedTabsProps) {
-  const [selected, setSelected] = React.useState<number | null>(null);
-  const outsideClickRef = React.useRef<HTMLDivElement>(
-    null as unknown as HTMLDivElement
-  );
+  const router = useRouter();
+  const pathname = usePathname();
   const buttonRefs = React.useRef<(HTMLButtonElement | null)[]>([]);
 
-  useOnClickOutside(outsideClickRef, () => {
-    setSelected(null);
-    onChange?.(null);
-  });
+  const selected = React.useMemo(() => {
+    return tabs.findIndex((tab) => tab.route === pathname);
+  }, [pathname, tabs]);
 
   const handleSelect = (index: number) => {
-    setSelected(index);
     onChange?.(index);
+    router.push(tabs[index].route);
   };
-
-  const Separator = () => (
-    <div
-      className="mx-1 h-[24px] w-[1.2px] bg-muted-foreground"
-      aria-hidden="true"
-    />
-  );
 
   return (
     <div
-      ref={outsideClickRef}
       className={cn(
         "flex flex-wrap items-center gap-2 rounded-2xl border-neutral-200 border-2 bg-[#1e1e1e] p-1 shadow-xl relative bg-opacity-10 backdrop-blur-md",
         className
       )}
     >
-      {selected !== null && buttonRefs.current[selected] && (
+      {selected !== -1 && buttonRefs.current[selected] && (
         <motion.div
           className="absolute rounded-xl bg-white border-zinc-200 border-2 z-0"
           layoutId="active-tab"
@@ -93,11 +76,8 @@ export function ExpandedTabs({
           }}
         />
       )}
-      {tabs.map((tab, index) => {
-        if (tab.type === "separator") {
-          return <Separator key={`separator-${index}`} />;
-        }
 
+      {tabs.map((tab, index) => {
         const Icon = tab.icon;
         const isSelected = selected === index;
 
