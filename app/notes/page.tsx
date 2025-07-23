@@ -1,5 +1,8 @@
-import HoverExpand from "@/components/ui/hover-expand";
+"use client";
 
+import { motion, useInView } from "framer-motion";
+import HoverExpand from "@/components/ui/hover-expand";
+import { useRef } from "react";
 const semesters = [
   {
     id: 1,
@@ -59,7 +62,10 @@ const semesters = [
   },
 ];
 
-export default function NotesDashboard() {
+export default function SemestersPage() {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-100px" });
+
   return (
     <section className="mx-auto min-w-screen h-screen rounded-[24px] p-2 md:rounded-t-[44px]">
       <article className="relative z-50 mt-20 flex flex-col items-center justify-center">
@@ -67,7 +73,16 @@ export default function NotesDashboard() {
           Semesters
         </h1>
       </article>
-      <HoverExpand semesters={semesters} />
+
+      {/* Scroll-triggered animation */}
+      <motion.div
+        ref={ref}
+        initial={{ opacity: 0, x: -40, filter: "blur(6px)" }}
+        animate={isInView ? { opacity: 1, x: 0, filter: "blur(0px)" } : {}}
+        transition={{ duration: 0.5, ease: "easeOut", delay: 0.1 }}
+      >
+        <HoverExpand semesters={semesters} />
+      </motion.div>
     </section>
   );
 }
