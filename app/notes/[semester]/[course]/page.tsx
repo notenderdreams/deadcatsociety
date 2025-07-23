@@ -1,16 +1,24 @@
 "use client";
 import { useRef } from "react";
+import { useRouter } from "next/navigation";
 
 interface StudyLog {
+  id: string;
   className: string;
+  courseCode: string;
+  semester: string;
   date: string;
   topics: string[];
 }
 
 export default function App() {
+  const router = useRouter();
   const studyLogs: StudyLog[] = [
     {
+      id: "550e8400-e29b-41d4-a716-446655440000",
       className: "Speculative Realities",
+      courseCode: "EEE-3101",
+      semester: "1",
       date: "Nov 15, 2024",
       topics: [
         "Sci-fi Labour exhibition in Beta",
@@ -21,7 +29,10 @@ export default function App() {
       ],
     },
     {
+      id: "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
       className: "Chilton Database",
+      courseCode: "EEE-3102",
+      semester: "1",
       date: "Oct 28, 2024",
       topics: [
         "Terell Sprout",
@@ -33,7 +44,10 @@ export default function App() {
       ],
     },
     {
+      id: "6ba7b811-9dad-11d1-80b4-00c04fd430c9",
       className: "Charles Cockrell",
+      courseCode: "EEE-3103",
+      semester: "1",
       date: "Oct 14, 2024",
       topics: [
         "Character-Conscious Essays",
@@ -43,7 +57,10 @@ export default function App() {
       ],
     },
     {
+      id: "6ba7b812-9dad-11d1-80b4-00c04fd430c0",
       className: "Ironia Airolica",
+      courseCode: "EEE-3104",
+      semester: "1",
       date: "Sep 30, 2024",
       topics: [
         "Kappersville Laboratory",
@@ -55,7 +72,10 @@ export default function App() {
       ],
     },
     {
+      id: "6ba7b813-9dad-11d1-80b4-00c04fd430c1",
       className: "Jean Park",
+      courseCode: "EEE-3105",
+      semester: "1",
       date: "Sep 22, 2024",
       topics: [],
     },
@@ -68,8 +88,14 @@ export default function App() {
       </div>
 
       <div className="max-w-6xl mx-auto px-8 pb-16">
-        {studyLogs.map((log, index) => (
-          <StudyLogItem key={index} log={log} />
+        {studyLogs.map((log) => (
+          <StudyLogItem
+            key={log.id}
+            log={log}
+            onClick={() =>
+              router.push(`/notes/${log.semester}/${log.courseCode}/${log.id}`)
+            }
+          />
         ))}
         <div className="h-16" />
       </div>
@@ -79,9 +105,10 @@ export default function App() {
 
 interface StudyLogItemProps {
   log: StudyLog;
+  onClick: () => void;
 }
 
-function StudyLogItem({ log }: StudyLogItemProps) {
+function StudyLogItem({ log, onClick }: StudyLogItemProps) {
   const itemRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
 
@@ -110,7 +137,6 @@ function StudyLogItem({ log }: StudyLogItemProps) {
     const y = ev.clientY - rect.top;
     const edge = findClosestEdge(x, y, rect.width, rect.height);
 
-    // Set initial position based on entry edge and animate to center
     overlayRef.current.style.transform = `translate3d(0, ${
       edge === "top" ? "-100%" : "100%"
     }, 0)`;
@@ -130,7 +156,6 @@ function StudyLogItem({ log }: StudyLogItemProps) {
     const y = ev.clientY - rect.top;
     const edge = findClosestEdge(x, y, rect.width, rect.height);
 
-    // Animate out to exit edge
     overlayRef.current.style.transform = `translate3d(0, ${
       edge === "top" ? "-100%" : "100%"
     }, 0)`;
@@ -142,6 +167,7 @@ function StudyLogItem({ log }: StudyLogItemProps) {
       className="group relative overflow-hidden border-t border-[#3d3d3d] bg-white cursor-pointer"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
+      onClick={onClick}
     >
       {/* Background Color Overlay */}
       <div
@@ -164,6 +190,7 @@ function StudyLogItem({ log }: StudyLogItemProps) {
         <div className="space-y-2">
           <h2 className="font-medium text-base">{log.className}</h2>
           <div className="text-sm opacity-70">{log.date}</div>
+          <div className="text-xs opacity-50">{log.courseCode}</div>
         </div>
 
         {/* Topics */}
