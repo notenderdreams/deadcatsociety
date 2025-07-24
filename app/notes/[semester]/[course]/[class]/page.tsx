@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Download, Pencil } from "lucide-react";
+import {Button} from "@heroui/react"
 
 const classData = {
   semester: "Semester 1",
@@ -31,17 +32,17 @@ const classData = {
 
 export default function ClassGridPage() {
   return (
-    <div className="min-h-screen px-4 py-10 flex flex-col items-center">
+    <div className="min-h-screen bg-neutral-100  px-4 py-10 flex flex-col items-center">
       {/* Top Bar: Breadcrumb + Edit Button */}
       <div className="flex justify-between items-center w-full max-w-5xl mb-6">
         <nav className="text-sm text-neutral-500">
-          {classData.semester} &gt; {classData.course} &gt;{" "}
+          {classData.semester} / {classData.course} /{" "}
           <span className="text-black font-medium">{classData.classTitle}</span>
         </nav>
-        <button className="inline-flex items-center gap-1 text-sm px-3 py-1 border border-neutral-300 rounded hover:bg-neutral-100 transition">
+        <Button className="inline-flex items-center gap-1 text-sm px-3 py-1 border border-neutral-300 rounded hover:bg-neutral-100 transition">
           <Pencil size={14} />
           Edit
-        </button>
+        </Button>
       </div>
 
       {/* Grid layout */}
