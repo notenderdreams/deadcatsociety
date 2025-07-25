@@ -1,37 +1,42 @@
 "use client";
+
 import { Button } from "@heroui/react";
-import { ArrowUp, User, Fan } from "lucide-react";
+import { ArrowUp, User } from "lucide-react";
 import Image from "next/image";
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, FormEvent } from "react";
 
-const page = () => {
-  const [inputValue, setInputValue] = useState("");
-  const [messages, setMessages] = useState([]);
-  const [showImages, setShowImages] = useState(true);
-  const [isTransitioning, setIsTransitioning] = useState(false);
-  const messagesEndRef = useRef(null);
+interface Message {
+  id: number;
+  text: string;
+  sender: "user" | "ai";
+}
 
-  const handleSubmit = (e) => {
+const Page: React.FC = () => {
+  const [inputValue, setInputValue] = useState<string>("");
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [showImages, setShowImages] = useState<boolean>(true);
+  const [isTransitioning, setIsTransitioning] = useState<boolean>(false);
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (inputValue.trim()) {
-      // Trigger transition on first message
       if (showImages) {
         setShowImages(false);
         setIsTransitioning(true);
       }
 
-      // Add user message
-      const newMessage = {
+      const newMessage: Message = {
         id: Date.now(),
         text: inputValue,
         sender: "user",
       };
-      setMessages((prev) => [...prev, newMessage]);
-      setInputValue(""); // Clear input field
 
-      // Simulate AI response after a delay
+      setMessages((prev) => [...prev, newMessage]);
+      setInputValue("");
+
       setTimeout(() => {
-        const aiResponse = {
+        const aiResponse: Message = {
           id: Date.now() + 1,
           text: "Thanks for your message! This is a simulated AI response.",
           sender: "ai",
@@ -41,7 +46,6 @@ const page = () => {
     }
   };
 
-  // Scroll to bottom when messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -83,7 +87,7 @@ const page = () => {
         />
       </div>
 
-      {/* Chat Messages - now takes full available space above input */}
+      {/* Chat Messages */}
       {isTransitioning && (
         <div className="absolute top-0 left-0 right-0 bottom-52 overflow-y-auto p-6">
           <div className="w-full max-w-2xl mx-auto flex flex-col justify-end min-h-full">
@@ -104,7 +108,14 @@ const page = () => {
                     {message.sender === "user" ? (
                       <User size={16} className="text-white" />
                     ) : (
-                      <Fan size={16} className="text-white" />
+                      <div className="relative w-8 h-8 rounded-full overflow-hidden">
+                        <Image
+                          src="/limi-proc.png"
+                          alt="limi avatar"
+                          layout="fill"
+                          objectFit="cover"
+                        />
+                      </div>
                     )}
                   </div>
                   <div className="bg-[#D9D9D9] text-center px-5 py-2 rounded-lg max-w-md">
@@ -129,7 +140,7 @@ const page = () => {
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
-                handleSubmit(e);
+                handleSubmit(e as unknown as FormEvent);
               }
             }}
           />
@@ -145,4 +156,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default Page;
