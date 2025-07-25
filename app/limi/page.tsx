@@ -1,38 +1,145 @@
 "use client";
 import { Button } from "@heroui/react";
-import { ArrowUp } from "lucide-react";
+import { ArrowUp, User, Fan } from "lucide-react";
 import Image from "next/image";
-import React from "react";
+import React, { useState, useRef, useEffect } from "react";
 
 const page = () => {
+  const [inputValue, setInputValue] = useState("");
+  const [messages, setMessages] = useState([]);
+  const [showImages, setShowImages] = useState(true);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const messagesEndRef = useRef(null);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (inputValue.trim()) {
+      // Trigger transition on first message
+      if (showImages) {
+        setShowImages(false);
+        setIsTransitioning(true);
+      }
+
+      // Add user message
+      const newMessage = {
+        id: Date.now(),
+        text: inputValue,
+        sender: "user",
+      };
+      setMessages((prev) => [...prev, newMessage]);
+      setInputValue(""); // Clear input field
+
+      // Simulate AI response after a delay
+      setTimeout(() => {
+        const aiResponse = {
+          id: Date.now() + 1,
+          text: "Thanks for your message! This is a simulated AI response.",
+          sender: "ai",
+        };
+        setMessages((prev) => [...prev, aiResponse]);
+      }, 1000);
+    }
+  };
+
+  // Scroll to bottom when messages change
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
   return (
-    <div className="h-screen relative">
-      <div className="flex justify-center items-center h-1/2 relative">
+    <div className="h-screen relative overflow-hidden">
+      <style jsx>{`
+        @keyframes slideInFromBottom {
+          from {
+            opacity: 0;
+            transform: translateY(30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+      `}</style>
+
+      {/* Images that move up */}
+      <div
+        className={`flex justify-center items-center h-1/2 relative transition-all duration-1000 ease-in ${
+          isTransitioning ? "-translate-y-full" : "translate-y-0"
+        }`}
+      >
         <Image
           src="/limi-bg.png"
-          alt="Limi Process"
+          alt="Limi Background"
           width={1080}
           height={695}
+          className="transition-all duration-1000 ease-in"
         />
         <Image
-          className="absolute "
+          className="absolute transition-all duration-1000 ease-in"
           src="/limi-proc.png"
           alt="Limi Process"
           width={755}
           height={275}
         />
       </div>
+
+      {/* Chat Messages - now takes full available space above input */}
+      {isTransitioning && (
+        <div className="absolute top-0 left-0 right-0 bottom-52 overflow-y-auto p-6">
+          <div className="w-full max-w-2xl mx-auto flex flex-col justify-end min-h-full">
+            <div className="space-y-4 mt-auto">
+              {messages.map((message, index) => (
+                <div
+                  key={message.id}
+                  className={`flex items-start gap-3 ${
+                    message.sender === "user" ? "flex-row-reverse self-end" : ""
+                  }`}
+                  style={{
+                    animation: `slideInFromBottom 0.5s ease-out forwards`,
+                    animationDelay: `${index * 0.1}s`,
+                    opacity: 0,
+                  }}
+                >
+                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-neutral-400 flex items-center justify-center">
+                    {message.sender === "user" ? (
+                      <User size={16} className="text-white" />
+                    ) : (
+                      <Fan size={16} className="text-white" />
+                    )}
+                  </div>
+                  <div className="bg-[#D9D9D9] text-center px-5 py-2 rounded-lg max-w-md">
+                    <p>{message.text}</p>
+                  </div>
+                </div>
+              ))}
+              <div ref={messagesEndRef} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Input Field */}
       <div className="absolute bg-white hover:bg-neutral-100 h-32 w-2/5 rounded-4xl left-1/2 -translate-x-1/2 -translate-y-1/2 bottom-10 flex items-center px-6 border-3 border-neutral-300">
-        <textarea
-          placeholder="Ask me anything 'bout your notes ...."
-          className="flex-grow bg-transparent border-0 outline-0 text-neutral-800 placeholder:text-neutral-400 text-lg resize-none h-full py-4"
-        />
-        <Button
-          type="submit"
-          className="ml-4 p-2 bg-blue-700 rounded-lg text-white hover:bg-blue-800 transition"
-        >
-          <ArrowUp size={20} />
-        </Button>
+        <form onSubmit={handleSubmit} className="flex-grow flex h-full">
+          <textarea
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            placeholder="Ask me anything 'bout your notes ...."
+            className="flex-grow bg-transparent border-0 outline-0 text-neutral-800 placeholder:text-neutral-400 text-lg resize-none h-full py-4"
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                handleSubmit(e);
+              }
+            }}
+          />
+          <Button
+            type="submit"
+            className="ml-4 p-2 bg-blue-700 rounded-lg text-white hover:bg-blue-800 transition self-end mb-4"
+          >
+            <ArrowUp size={20} />
+          </Button>
+        </form>
       </div>
     </div>
   );
