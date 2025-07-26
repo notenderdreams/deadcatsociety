@@ -41,18 +41,17 @@ const Page: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
-  const callApi = async (question: string): Promise<ApiResponse> => {
+  const fetchAnswerFromLimi = async (
+    question: string
+  ): Promise<ApiResponse> => {
     try {
-      const response = await fetch("http://127.0.0.1:8000/ask", {
+      const response = await fetch("/api/limi/ask", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
         },
-        mode: "cors",
-        body: JSON.stringify({
-          question: question,
-        }),
+        body: JSON.stringify({ question }),
       });
 
       if (!response.ok) {
@@ -62,7 +61,6 @@ const Page: React.FC = () => {
       }
 
       const data = await response.json();
-      console.log("API Response:", data);
       return data;
     } catch (error) {
       console.error("Fetch error:", error);
@@ -98,7 +96,7 @@ const Page: React.FC = () => {
       setIsLoading(true);
 
       try {
-        const apiResponse = await callApi(currentQuestion);
+        const apiResponse = await fetchAnswerFromLimi(currentQuestion);
 
         const aiResponse: Message = {
           id: Date.now() + 1,
