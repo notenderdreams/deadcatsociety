@@ -1,6 +1,7 @@
 "use client";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 
 interface StudyLog {
   id: string;
@@ -87,7 +88,19 @@ export default function App() {
         <h1 className="text-4xl font-bold">Classes</h1>
       </div>
 
-      <div className="max-w-6xl mx-auto px-8 pb-16">
+      <motion.div
+        className="max-w-6xl mx-auto px-8 pb-16"
+        initial="hidden"
+        animate="visible"
+        variants={{
+          hidden: {},
+          visible: {
+            transition: {
+              staggerChildren: 0.1,
+            },
+          },
+        }}
+      >
         {studyLogs.map((log) => (
           <StudyLogItem
             key={log.id}
@@ -98,7 +111,7 @@ export default function App() {
           />
         ))}
         <div className="h-16" />
-      </div>
+      </motion.div>
     </div>
   );
 }
@@ -109,6 +122,7 @@ interface StudyLogItemProps {
 }
 
 function StudyLogItem({ log, onClick }: StudyLogItemProps) {
+  const [isHovered, setIsHovered] = useState(false);
   const itemRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
 
@@ -144,6 +158,7 @@ function StudyLogItem({ log, onClick }: StudyLogItemProps) {
     requestAnimationFrame(() => {
       if (overlayRef.current) {
         overlayRef.current.style.transform = "translate3d(0, 0%, 0)";
+        setIsHovered(true);
       }
     });
   };
@@ -159,10 +174,20 @@ function StudyLogItem({ log, onClick }: StudyLogItemProps) {
     overlayRef.current.style.transform = `translate3d(0, ${
       edge === "top" ? "-100%" : "100%"
     }, 0)`;
+
+    setIsHovered(false);
   };
 
   return (
-    <div
+    <motion.div
+      variants={{
+        hidden: { opacity: 0, y: 50 },
+        visible: { opacity: 1, y: 0 },
+      }}
+      transition={{
+        duration: 0.6,
+        ease: [0.16, 1, 0.3, 1],
+      }}
       ref={itemRef}
       className="group relative overflow-hidden border-t border-[#3d3d3d] bg-white cursor-pointer"
       onMouseEnter={handleMouseEnter}
@@ -180,12 +205,20 @@ function StudyLogItem({ log, onClick }: StudyLogItemProps) {
       />
 
       {/* Right Arrow on Hover */}
-      <div className="absolute top-1/2 right-4 -translate-y-1/2 text-white opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300 text-2xl z-20">
+      <div
+        className={`absolute top-1/2 right-4 -translate-y-1/2 text-white transition-all duration-300 text-2xl z-20
+          ${isHovered ? "opacity-100 translate-x-1" : "opacity-0"}
+        `}
+      >
         →
       </div>
 
-      {/* Content - changes color when overlay is visible */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 px-4 py-6 relative z-10 group-hover:text-white transition-colors duration-300">
+      {/* Content - changes color only when isHovered */}
+      <div
+        className={`grid grid-cols-1 md:grid-cols-2 gap-8 px-4 py-6 relative z-10 transition-colors duration-300 ${
+          isHovered ? "text-white" : "text-black"
+        }`}
+      >
         {/* Class Info */}
         <div className="space-y-2">
           <h2 className="font-medium text-base">{log.className}</h2>
@@ -209,6 +242,6 @@ function StudyLogItem({ log, onClick }: StudyLogItemProps) {
           )}
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
