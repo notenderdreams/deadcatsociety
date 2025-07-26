@@ -58,7 +58,7 @@ export default function SemesterGrid() {
   return (
     <div className="min-h-screen">
       <div className="w-full flex justify-center p-24">
-        <h1 className="max-w-2xl text-center text-6xl font-semibold font-serif tracking-tight">
+        <h1 className="w-full px-64 text-4xl font-semibold font-serif tracking-tight">
           Summer 2025
         </h1>
       </div>

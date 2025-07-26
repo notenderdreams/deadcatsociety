@@ -2,6 +2,8 @@
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import { Button } from "@heroui/react";
+import { PlugIcon, PlusIcon } from "lucide-react";
 
 interface StudyLog {
   id: string;
@@ -84,8 +86,12 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-white text-black">
-      <div className="text-center py-16">
-        <h1 className="text-4xl font-bold">Classes</h1>
+      <div className="px-96 py-16 flex justify-between">
+        <h1 className="text-4xl font-serif">Classes</h1>
+        <Button className="bg-black text-white ">
+          <PlusIcon size={16}/>
+          New Class
+        </Button>
       </div>
 
       <motion.div
@@ -220,14 +226,13 @@ function StudyLogItem({ log, onClick }: StudyLogItemProps) {
         }`}
       >
         {/* Class Info */}
-        <div className="space-y-2">
+        <div className="space-y-2 text-left">
           <h2 className="font-medium text-base">{log.className}</h2>
           <div className="text-sm opacity-70">{log.date}</div>
-          <div className="text-xs opacity-50">{log.courseCode}</div>
         </div>
 
         {/* Topics */}
-        <div className="space-y-1">
+        <div className="space-y-1 text-left">
           {log.topics.length > 0 ? (
             log.topics.map((topic, topicIndex) => (
               <div key={topicIndex} className="flex items-start">
