@@ -40,7 +40,6 @@ const transition = {
 export function ExpandedTabs({
   tabs,
   className,
-  activeColor = "text-primary",
   onChange,
 }: ExpandedTabsProps) {
   const router = useRouter();
@@ -48,7 +47,13 @@ export function ExpandedTabs({
   const buttonRefs = React.useRef<(HTMLButtonElement | null)[]>([]);
 
   const selected = React.useMemo(() => {
-    return tabs.findIndex((tab) => tab.route === pathname);
+    const sortedTabs = [...tabs].sort(
+      (a, b) => b.route.length - a.route.length
+    );
+    const matchedTab = sortedTabs.find((tab) => pathname.startsWith(tab.route));
+    return matchedTab
+      ? tabs.findIndex((tab) => tab.route === matchedTab.route)
+      : -1;
   }, [pathname, tabs]);
 
   const handleSelect = (index: number) => {
