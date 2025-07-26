@@ -4,6 +4,7 @@ import { Button } from "@heroui/react";
 import { ArrowUp, User } from "lucide-react";
 import Image from "next/image";
 import React, { useState, useRef, useEffect, FormEvent } from "react";
+import { TextShimmer } from "@/components/ui/text-shimmer";
 
 interface Message {
   id: number;
@@ -16,6 +17,7 @@ const Page: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [showImages, setShowImages] = useState<boolean>(true);
   const [isTransitioning, setIsTransitioning] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   const handleSubmit = (e: FormEvent) => {
@@ -26,23 +28,35 @@ const Page: React.FC = () => {
         setIsTransitioning(true);
       }
 
-      const newMessage: Message = {
+      const userMessage: Message = {
         id: Date.now(),
         text: inputValue,
         sender: "user",
       };
 
-      setMessages((prev) => [...prev, newMessage]);
+      setMessages((prev) => [...prev, userMessage]);
       setInputValue("");
 
+      // Add shimmer placeholder
+      const loadingMessage: Message = {
+        id: Date.now() + 0.5,
+        text: "Searching...",
+        sender: "ai",
+      };
+      setMessages((prev) => [...prev, loadingMessage]);
+      setIsLoading(true);
+
+      // Simulate delay
       setTimeout(() => {
         const aiResponse: Message = {
           id: Date.now() + 1,
           text: "Thanks for your message! This is a simulated AI response.",
           sender: "ai",
         };
-        setMessages((prev) => [...prev, aiResponse]);
-      }, 1000);
+        // Replace shimmer message with actual response
+        setMessages((prev) => [...prev.slice(0, -1), aiResponse]);
+        setIsLoading(false);
+      }, 5000);
     }
   };
 
@@ -119,7 +133,13 @@ const Page: React.FC = () => {
                     )}
                   </div>
                   <div className="bg-[#D9D9D9] text-center px-5 py-2 rounded-lg max-w-md">
-                    <p>{message.text}</p>
+                    {isLoading && message.text === "Searching..." ? (
+                      <TextShimmer className="text-sm font-mono" duration={1.5}>
+                        Searching...
+                      </TextShimmer>
+                    ) : (
+                      <p>{message.text}</p>
+                    )}
                   </div>
                 </div>
               ))}
