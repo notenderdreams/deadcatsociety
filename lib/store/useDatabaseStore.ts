@@ -1,112 +1,120 @@
-// lib/store/useDatabaseStore.ts
 import { create } from "zustand";
-import {
-  mockDatabase,
-  MockDatabase,
-  MockSemester,
-  MockCourse,
-  // Renamed import back to MockClass to match mockData.ts
-  MockClass,
-} from "@/lib/mock"; // Adjust path if needed to point to the correct mock file
-
-// Define the shape of your Zustand store state
-interface DatabaseState {
-  // The core data structure matching your mock
-  data: MockDatabase;
-  // Loading and error states
-  isLoading: boolean;
-  error: string | null;
-  // Actions to update the state
-  setData: (newData: MockDatabase) => void;
-  setLoading: (loading: boolean) => void;
-  setError: (error: string | null) => void;
-  // Derived selectors or helper actions
-  getActiveSemester: () => MockSemester | undefined;
-  getSemesterById: (id: number) => MockSemester | undefined;
-  // Note: getCourseByCode requires 'code' field in MockCourse (not present in provided mockData.ts)
-  // Keeping it if you plan to add 'code' later, but it won't work with current mockData.ts
-  getCourseByCode: (code: string) => MockCourse | undefined;
-  getCourseById: (id: string) => MockCourse | undefined; // Find course by its ID
-  // Updated return type to MockClass
-  getClassById: (id: string) => MockClass | undefined;
-  getCoursesForSemester: (semesterId: number) => MockCourse[];
-  // Updated return type to MockClass[]
-  getClassesForCourse: (courseId: string) => MockClass[];
+export interface DatabaseClass {
+  id: string;
+  course_id: string;
+  title: string;
+  description: string;
+  topics: string[];
+  notes: string[];
+  references: string[];
+  contributors: string[];
+  updated_at: string;
 }
 
-// Create the Zustand store
+export interface DatabaseCourse {
+  id: string;
+  semester_id: number;
+  name: string;
+  updated_at: string;
+  classes?: DatabaseClass[];
+}
+
+export interface DatabaseSemester {
+  id: number;
+  name: string;
+  is_active: boolean;
+  courses?: DatabaseCourse[];
+}
+
+export interface DatabaseStructure {
+  semesters: DatabaseSemester[];
+}
+
+interface DatabaseState {
+  data: DatabaseStructure;
+  isLoading: boolean;
+  error: string | null;
+  setData: (newData: DatabaseStructure) => void;
+  setLoading: (loading: boolean) => void;
+  setError: (error: string | null) => void;
+  getActiveSemester: () => DatabaseSemester | undefined;
+  getSemesterById: (id: number) => DatabaseSemester | undefined;
+  getCourseById: (id: string) => DatabaseCourse | undefined;
+  getClassById: (id: string) => DatabaseClass | undefined;
+  getCoursesForSemester: (semesterId: number) => DatabaseCourse[];
+  getClassesForCourse: (courseId: string) => DatabaseClass[];
+}
+
 export const useDatabaseStore = create<DatabaseState>()((set, get) => ({
-  // Initial state
   data: { semesters: [] },
   isLoading: false,
   error: null,
-
-  // Actions
   setData: (newData) => set({ data: newData, isLoading: false, error: null }),
   setLoading: (loading) => set({ isLoading: loading }),
   setError: (error) => set({ error, isLoading: false }),
-
-  // Derived Selectors / Helpers
   getActiveSemester: () => {
     return get().data.semesters.find((s) => s.is_active);
   },
   getSemesterById: (id) => {
     return get().data.semesters.find((s) => s.id === id);
   },
-  // This will not work correctly with the provided mockData.ts as MockCourse lacks 'code'
-  // It requires MockCourse to have a 'code' field.
-  getCourseByCode: (code) => {
-    for (const semester of get().data.semesters) {
-      // Requires MockCourse to have a 'code' property
-      const course = semester.courses.find((c) => c.id === code);
-      if (course) return course;
-    }
-    return undefined;
-  },
-  // Find a course by its unique ID (matches mockData.ts MockCourse.id)
   getCourseById: (id) => {
     for (const semester of get().data.semesters) {
-      const course = semester.courses.find((c) => c.id === id);
-      if (course) return course;
+      if (semester.courses) {
+        const course = semester.courses.find((c) => c.id === id);
+        if (course) return course;
+      }
     }
     return undefined;
   },
-  // Updated return type and logic to use MockClass
   getClassById: (id) => {
     for (const semester of get().data.semesters) {
-      for (const course of semester.courses) {
-        // Accesses the 'classes' array of MockCourse
-        const cls = course.classes.find((c) => c.id === id);
-        if (cls) return cls; // Returns MockClass object
+      if (semester.courses) {
+        for (const course of semester.courses) {
+          if (course.classes) {
+            const cls = course.classes.find((c) => c.id === id);
+            if (cls) return cls;
+          }
+        }
       }
     }
     return undefined;
   },
   getCoursesForSemester: (semesterId) => {
     const semester = get().getSemesterById(semesterId);
-    return semester ? semester.courses : [];
+    return semester && semester.courses ? semester.courses : [];
   },
-  // Updated return type and logic to use MockClass
   getClassesForCourse: (courseId) => {
     const course = get().getCourseById(courseId);
-    // Accesses the 'classes' array of MockCourse and returns MockClass[]
-    return course ? course.classes : [];
+    return course && course.classes ? course.classes : [];
   },
 }));
 
 export const useInitializeDatabase = () => {
   const { setData, setLoading, setError } = useDatabaseStore();
-
   return async () => {
-    if (useDatabaseStore.getState().data.semesters.length > 0) return;
-
+    if (useDatabaseStore.getState().data.semesters.length > 0) {
+      console.log("Database already initialized or loading.");
+      return;
+    }
     setLoading(true);
+    setError(null);
     try {
+      console.log("Fetching data from /api/notes...");
       const res = await fetch("/api/notes");
+      console.log("Fetch response status:", res.status);
+      if (!res.ok) {
+        throw new Error(`API request failed with status ${res.status}`);
+      }
       const json = await res.json();
-      setData(json); // Matches MockDatabase shape
+      console.log("Data fetched successfully:", json);
+      setData(json as DatabaseStructure);
+      console.log("Data set in Zustand store.");
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Unknown error";
+      const msg =
+        err instanceof Error
+          ? err.message
+          : "Unknown error during initialization";
       console.error("Initialization failed:", msg);
       setError(msg);
     }

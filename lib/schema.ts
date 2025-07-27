@@ -1,15 +1,15 @@
-import { pgTable, text, integer, boolean, timestamp} from "drizzle-orm/pg-core";
+import { pgTable, text, integer, boolean, timestamp, uuid} from "drizzle-orm/pg-core";
 
-// 🔶 Semester Table
+//  Semester 
 export const semesters = pgTable("semesters", {
   id: integer("id").primaryKey().notNull(),
   name: text("name").notNull(),
   is_active: boolean("is_active").notNull(),
 });
 
-// 🔶 Course Table
+// Course
 export const courses = pgTable("courses", {
-  id: text("id").primaryKey().notNull(), // CSE2202, etc.
+  id: text("id").primaryKey().notNull(),  // Course Code 
   semester_id: integer("semester_id")
     .references(() => semesters.id)
     .notNull(),
@@ -17,17 +17,17 @@ export const courses = pgTable("courses", {
   updated_at: timestamp("updated_at", { mode: "string" }).notNull(),
 });
 
-// 🔶 Class Table
+//  Class 
 export const classes = pgTable("classes", {
-  id: text("id").primaryKey().notNull(),
+  id: uuid("id").primaryKey().notNull(),  
   course_id: text("course_id")
     .references(() => courses.id)
     .notNull(),
   title: text("title").notNull(),
   description: text("description"),
-  topics: text("topics").array(),        // string[]
-  notes: text("notes").array().notNull(),          // string[]
-  references: text("references").array(),// string[]
-  contributors: text("contributors").array().notNull(), // string[]
+  topics: text("topics").array(),
+  notes: text("notes").array().notNull(),          
+  references: text("references").array(), 
+  contributors: text("contributors").array().notNull(), 
   updated_at: timestamp("updated_at", { mode: "string" }).notNull(),
 });

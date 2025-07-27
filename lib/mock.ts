@@ -1,5 +1,3 @@
-// lib/mockData.ts
-
 export interface MockClass {
   id: string;
   course_id: string;

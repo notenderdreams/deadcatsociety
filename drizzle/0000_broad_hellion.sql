@@ -1,5 +1,5 @@
 CREATE TABLE "classes" (
-	"id" text PRIMARY KEY NOT NULL,
+	"id" uuid PRIMARY KEY NOT NULL,
 	"course_id" text NOT NULL,
 	"title" text NOT NULL,
 	"description" text,
