@@ -1,48 +1,40 @@
-// notes/[semester]/[course]/[class]/page.tsx
 "use client";
 
-import { useMemo } from "react"; // Add useMemo
-import { useParams } from "next/navigation"; // Add useParams
+import { useMemo } from "react"; 
+import { useParams } from "next/navigation"; 
 import { Download, Pencil } from "lucide-react";
 import { Button } from "@heroui/react";
 import ClassNavPanel from "@/components/ClassNavPanel";
-import { useDatabaseStore } from "@/lib/store/useDatabaseStore"; // Import store
+import { useDatabaseStore } from "@/lib/store/useDatabaseStore"; 
 
-// Define the type for the data you'll pass to the component
 interface ClassDetailData {
-  semesterName: string; // Or ID if preferred
+  semesterName: string; 
   courseCode: string;
   courseName: string;
   classTitle: string;
   description: string;
   topics: string[];
-  notesFile?: { name: string; url: string }; // Optional
+  notesFile?: { name: string; url: string }; 
   references: string[];
   contributors: string[];
   lastUpdated: string;
-  // Add other fields as needed
 }
 
 export default function ClassDetailPage() {
   const params = useParams();
-  // const semesterParam = params.semester as string; // Not strictly needed if getting from data
-  // const courseParam = params.course as string;    // Not strictly needed if getting from data
   const classParam = params.class as string;
 
-  // --- Zustand Integration ---
   const { getClassById } = useDatabaseStore();
 
-  // Find the specific class data using the class ID from the URL
   const classData = useMemo(() => {
     if (!classParam) return null;
     return getClassById(classParam);
   }, [classParam, getClassById]);
 
-  // Derive the structured data for the page from the raw class data and related course/semester
   const pageData: ClassDetailData | null = useMemo(() => {
     if (!classData) return null;
 
-    const { getCourseById } = useDatabaseStore.getState(); // Get helper (non-reactive access within useMemo is fine)
+    const { getCourseById } = useDatabaseStore.getState(); 
     const course = getCourseById(classData.course_id);
     if (!course) return null;
 
@@ -55,15 +47,14 @@ export default function ClassDetailPage() {
       courseCode: course.id,
       courseName: course.name,
       classTitle: classData.title,
-      description: classData.description, // Assuming 'content' holds the description text/URL
+      description: classData.description, 
       topics: classData.topics || [],
-      // Handle notes file - assuming the first note link is the main one, or handle differently
       notesFile:
         classData.notes && classData.notes.length > 0
           ? { name: `Notes for ${classData.title}`, url: classData.notes[0] }
           : undefined,
-      references: classData.references || [], // Map 'resources' to 'references'
-      contributors: classData.contributors, // Wrap single contributor in array, or handle array if data changes
+      references: classData.references || [], 
+      contributors: classData.contributors, 
       lastUpdated: new Date(
         classData.updated_at 
       ).toLocaleDateString("en-US", {
@@ -73,7 +64,6 @@ export default function ClassDetailPage() {
       }),
     };
   }, [classData]);
-  // --- End Zustand Integration ---
 
   if (!pageData) {
     return (

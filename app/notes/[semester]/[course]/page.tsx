@@ -6,9 +6,9 @@ import { useRouter, useParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { Button } from "@heroui/react";
 import { PlusIcon } from "lucide-react";
-import { useDatabaseStore } from "@/lib/store/useDatabaseStore"; // Import store
+import { useDatabaseStore } from "@/lib/store/useDatabaseStore";
 
-interface StudyLog {
+interface ClassBlock {
   id: string;
   className: string;
   date: string;
@@ -16,17 +16,13 @@ interface StudyLog {
 }
 
 export default function App() {
-  // Renamed component for clarity, adjust export default if needed in your file
   const router = useRouter();
   const params = useParams();
   const semesterParam = params.semester as string;
-  const courseParam = params.course as string; // This is now expected to be the course ID (e.g., "CSE2101")
+  const courseParam = params.course as string; 
 
-  // --- Zustand Integration ---
-  // Use getCourseById instead of getCourseByCode
   const { getSemesterById, getCourseById } = useDatabaseStore();
 
-  // Find the semester object
   const semesterData = useMemo(() => {
     const id = parseInt(semesterParam, 10);
     if (!isNaN(id)) {
@@ -35,36 +31,23 @@ export default function App() {
     return undefined;
   }, [semesterParam, getSemesterById]);
 
-  // --- FIXED: Find the specific course by its ID ---
-  // The URL param (courseParam) is now the course ID (e.g., "CSE2101")
   const courseData = useMemo(() => {
     if (!semesterData || !courseParam) return undefined;
 
-    // Find the course within the semester's courses array by matching course.id
-    // with the courseParam (which is the course ID passed in the URL)
-    // First, find the course in the semester data
-    const foundCourse = semesterData.courses.find((c) => c.id === courseParam);
+    const foundCourse = semesterData.courses?.find((c) => c.id === courseParam);
 
-    // If not found in the specific semester, fallback to global search (less efficient, but robust)
     if (foundCourse) {
       return foundCourse;
     }
-    // Fallback: Search globally using the store's helper if needed
-    // This is useful if the URL structure allows accessing courses directly
-    // or if there's a chance the course isn't under the expected semester in mock data.
-    // Ensure getCourseById searches by .id, not .code (as corrected in Zustand store).
-    return getCourseById(courseParam); // Use the global helper as a fallback
-  }, [semesterData, courseParam, getCourseById]); // Add getCourseById to dependencies
-  // --- End FIXED course lookup ---
+    return getCourseById(courseParam); 
+  }, [semesterData, courseParam, getCourseById]); 
 
-  // Derive study logs (classes) from the course data
-  const studyLogs: StudyLog[] = useMemo(() => {
+  const classBlocks: ClassBlock[] = useMemo(() => {
     if (!courseData) return [];
-    return courseData.classes.map((cls) => ({
+    return courseData.classes?.map((cls) => ({
       id: cls.id,
       className: cls.title,
       date: new Date(cls.updated_at).toLocaleDateString("en-US", {
-        // Use updated_at or created_at
         month: "short",
         day: "numeric",
         year: "numeric",
@@ -72,9 +55,7 @@ export default function App() {
       topics: cls.topics || [],
     }));
   }, [courseData]);
-  // --- End Zustand Integration ---
 
-  // Handle navigation to a specific class detail page
   const handleClassClick = (classId: string) => {
     if (!semesterParam || !courseParam) {
       console.error("Semester or Course parameter is missing for navigation");
@@ -94,18 +75,15 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-white text-black">
-      {/* --- FIXED: Display course.name, removed non-existent course.code --- */}
       <div className="px-96 py-16 flex justify-between">
         <h1 className="text-4xl font-serif">
-          {courseData.name} {/* Display the course name */}
-          {/* ({courseData.code}) Removed - code doesn't exist in MockCourse */}
+          {courseData.name} 
         </h1>
         <Button className="bg-black text-white ">
           <PlusIcon size={16} />
           New Class
         </Button>
       </div>
-      {/* --- End FIXED title --- */}
 
       <motion.div
         className="max-w-6xl mx-auto px-8 pb-16"
@@ -120,12 +98,12 @@ export default function App() {
           },
         }}
       >
-        {studyLogs.length > 0 ? (
-          studyLogs.map((log) => (
-            <StudyLogItem
-              key={log.id}
-              log={log}
-              onClick={() => handleClassClick(log.id)}
+        {classBlocks.length > 0 ? (
+          classBlocks.map((block) => (
+            <ClassBlockItem
+              key={block.id}
+              log={block}
+              onClick={() => handleClassClick(block.id)}
             />
           ))
         ) : (
@@ -139,13 +117,13 @@ export default function App() {
   );
 }
 
-// --- StudyLogItem Component (Unchanged Style) ---
-interface StudyLogItemProps {
-  log: StudyLog;
+// --- ClassBlockItem Component (Unchanged Style) ---
+interface ClassBlockItemProps {
+  log: ClassBlock;
   onClick: () => void;
 }
 
-function StudyLogItem({ log, onClick }: StudyLogItemProps) {
+function ClassBlockItem({ log, onClick }: ClassBlockItemProps) {
   const [isHovered, setIsHovered] = useState(false);
   const itemRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
