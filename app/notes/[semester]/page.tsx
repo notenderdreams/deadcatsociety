@@ -1,5 +1,5 @@
 "use client";
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { GridPattern } from "@/components/magicui/grid-pattern";
 import { useParams, useRouter } from "next/navigation";
@@ -9,6 +9,7 @@ export default function SemesterGrid() {
   const router = useRouter();
   const params = useParams();
   const semesterParam = params.semester as string;
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const { getSemesterById, getActiveSemester } = useDatabaseStore();
 
@@ -34,7 +35,7 @@ export default function SemesterGrid() {
     return (
       semesterData?.courses?.map((course) => ({
         id: course.id,
-        name: course.name, 
+        name: course.name,
         classes: course.classes?.length || 0,
         lastUpdated: new Date(course.updated_at).toLocaleDateString("en-US", {
           month: "long",
@@ -44,6 +45,31 @@ export default function SemesterGrid() {
       })) || []
     );
   }, [semesterData]);
+
+  useEffect(() => {
+    if (containerRef.current) {
+      const courseBlocks =
+        containerRef.current.querySelectorAll(".course-block");
+
+      // Set initial state for all blocks
+      courseBlocks.forEach((block) => {
+        (block as HTMLElement).style.opacity = "0";
+        (block as HTMLElement).style.filter = "blur(4px)";
+        (block as HTMLElement).style.transform = "translateY(20px)";
+      });
+
+      // Trigger animation for all blocks simultaneously
+      setTimeout(() => {
+        courseBlocks.forEach((block) => {
+          (block as HTMLElement).style.transition =
+            "opacity 0.3s ease-out, transform 0.4s ease-out, filter 0.3s ease-out";
+          (block as HTMLElement).style.opacity = "1";
+          (block as HTMLElement).style.filter = "blur(0)";
+          (block as HTMLElement).style.transform = "translateY(0)";
+        });
+      }, 10); // Small timeout to ensure initial styles are applied
+    }
+  }, [courses]);
 
   const handleCourseClick = (courseId: string) => {
     if (!semesterData?.id) {
@@ -69,13 +95,22 @@ export default function SemesterGrid() {
           {semesterData.name}
         </h1>
       </div>
-      <div className="flex flex-col justify-center items-center px-4">
+      <div
+        className="flex flex-col justify-center items-center px-4"
+        ref={containerRef}
+      >
         <div className="grid grid-cols-3 border-t border-l border-neutral-300 max-w-6xl w-full">
           {courses.map((course) => (
             <div
               key={course.id}
-              className="relative border-b border-r border-neutral-300 p-8 h-64 flex flex-col justify-between cursor-pointer group overflow-hidden transition-colors duration-300 hover:bg-neutral-900"
-              onClick={() => handleCourseClick(course.id)} 
+              className="course-block relative border-b border-r border-neutral-300 p-8 h-64 flex flex-col justify-between cursor-pointer group overflow-hidden transition-colors duration-300 hover:bg-neutral-900"
+              onClick={() => handleCourseClick(course.id)}
+              style={{
+                opacity: 0,
+                transform: "translateY(20px)",
+                filter: "blur(4px)",
+                transition: "none",
+              }}
             >
               <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-0">
                 <div className="relative flex size-full items-center justify-center overflow-hidden rounded-lg p-20">
@@ -93,7 +128,7 @@ export default function SemesterGrid() {
                 </div>
               </div>
               <div className="relative z-10 text-2xl font-semibold group-hover:text-white transition-colors duration-300">
-                {course.name} 
+                {course.name}
               </div>
               <div className="relative z-10 text-sm group-hover:text-neutral-300 transition-colors duration-300">
                 {course.classes} classes
