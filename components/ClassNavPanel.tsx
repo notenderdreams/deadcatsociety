@@ -44,7 +44,7 @@ const ClassNavPanel = () => {
                 <button
                   key={classItem.id}
                   onClick={() => setSelectedClass(classItem.id)}
-                  className={`py-1.5 font-medium rounded-lg transition-colors duration-50 w-3/5 pr-4 ${
+                  className={`py-1 font-medium  transition-colors duration-50 w-3/5 pr-4 ${
                     selectedClass === classItem.id
                       ? "bg-[#016FFF] text-white"
                       : "bg-transparent text-gray-700 hover:bg-[#016FFF1A]"

@@ -6,7 +6,7 @@
 - is_active
 
 **Table**: courses
-- code (e.g., "CSE4301") ->Key
+- id ( string e.g., "CSE4301") ->Key
 - semester_id (foreign key)
 - name
 - updated_at

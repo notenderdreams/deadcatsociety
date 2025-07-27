@@ -1,95 +1,86 @@
+// notes/[semester]/[course]/page.tsx
 "use client";
-import { useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+
+import { useRef, useState, useMemo } from "react";
+import { useRouter, useParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { Button } from "@heroui/react";
-import { PlugIcon, PlusIcon } from "lucide-react";
+import { PlusIcon } from "lucide-react";
+import { useDatabaseStore } from "@/lib/store/useDatabaseStore";
 
-interface StudyLog {
+interface ClassBlock {
   id: string;
   className: string;
-  courseCode: string;
-  semester: string;
   date: string;
   topics: string[];
 }
 
 export default function App() {
   const router = useRouter();
-  const studyLogs: StudyLog[] = [
-    {
-      id: "550e8400-e29b-41d4-a716-446655440000",
-      className: "Speculative Realities",
-      courseCode: "EEE-3101",
-      semester: "1",
-      date: "Nov 15, 2024",
-      topics: [
-        "Sci-fi Labour exhibition in Beta",
-        "Lost Memory",
-        "Dune Spice",
-        "Ghost in the Shell",
-        "Blade Runner Nexus",
-      ],
-    },
-    {
-      id: "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
-      className: "Chilton Database",
-      courseCode: "EEE-3102",
-      semester: "1",
-      date: "Oct 28, 2024",
-      topics: [
-        "Terell Sprout",
-        "Frank Gehry",
-        "Dr. Zachariah Spergmann",
-        "And Goldstone",
-        "Lost Archives",
-        "Art Therapy",
-      ],
-    },
-    {
-      id: "6ba7b811-9dad-11d1-80b4-00c04fd430c9",
-      className: "Charles Cockrell",
-      courseCode: "EEE-3103",
-      semester: "1",
-      date: "Oct 14, 2024",
-      topics: [
-        "Character-Conscious Essays",
-        "Tangere Heritage",
-        "New Wave Science Fiction",
-        "Geraldo Sarribe",
-      ],
-    },
-    {
-      id: "6ba7b812-9dad-11d1-80b4-00c04fd430c0",
-      className: "Ironia Airolica",
-      courseCode: "EEE-3104",
-      semester: "1",
-      date: "Sep 30, 2024",
-      topics: [
-        "Kappersville Laboratory",
-        "S.N. Mazuzo",
-        "Transactivist Memoir",
-        "Z CORE",
-        "Hybrid Archeologies",
-        "Roboto Chin",
-      ],
-    },
-    {
-      id: "6ba7b813-9dad-11d1-80b4-00c04fd430c1",
-      className: "Jean Park",
-      courseCode: "EEE-3105",
-      semester: "1",
-      date: "Sep 22, 2024",
-      topics: [],
-    },
-  ];
+  const params = useParams();
+  const semesterParam = params.semester as string;
+  const courseParam = params.course as string; 
+
+  const { getSemesterById, getCourseById } = useDatabaseStore();
+
+  const semesterData = useMemo(() => {
+    const id = parseInt(semesterParam, 10);
+    if (!isNaN(id)) {
+      return getSemesterById(id);
+    }
+    return undefined;
+  }, [semesterParam, getSemesterById]);
+
+  const courseData = useMemo(() => {
+    if (!semesterData || !courseParam) return undefined;
+
+    const foundCourse = semesterData.courses?.find((c) => c.id === courseParam);
+
+    if (foundCourse) {
+      return foundCourse;
+    }
+    return getCourseById(courseParam); 
+  }, [semesterData, courseParam, getCourseById]); 
+
+  const classBlocks: ClassBlock[] = useMemo(() => {
+    if (!courseData) return [];
+    return courseData.classes?.map((cls) => ({
+      id: cls.id,
+      className: cls.title,
+      date: new Date(cls.updated_at).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      }),
+      topics: cls.topics || [],
+    }));
+  }, [courseData]);
+
+  const handleClassClick = (classId: string) => {
+    if (!semesterParam || !courseParam) {
+      console.error("Semester or Course parameter is missing for navigation");
+      return;
+    }
+    router.push(`/notes/${semesterParam}/${courseParam}/${classId}`);
+  };
+
+  if (!courseData) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        Course not found. (Semester ID: {semesterParam}, Course ID/Param:{" "}
+        {courseParam})
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white text-black">
       <div className="px-96 py-16 flex justify-between">
-        <h1 className="text-4xl font-serif">Classes</h1>
+        <h1 className="text-4xl font-serif">
+          {courseData.name} 
+        </h1>
         <Button className="bg-black text-white ">
-          <PlusIcon size={16}/>
+          <PlusIcon size={16} />
           New Class
         </Button>
       </div>
@@ -107,27 +98,32 @@ export default function App() {
           },
         }}
       >
-        {studyLogs.map((log) => (
-          <StudyLogItem
-            key={log.id}
-            log={log}
-            onClick={() =>
-              router.push(`/notes/${log.semester}/${log.courseCode}/${log.id}`)
-            }
-          />
-        ))}
+        {classBlocks.length > 0 ? (
+          classBlocks.map((block) => (
+            <ClassBlockItem
+              key={block.id}
+              log={block}
+              onClick={() => handleClassClick(block.id)}
+            />
+          ))
+        ) : (
+          <div className="text-center py-10 text-gray-500">
+            No classes found for this course yet.
+          </div>
+        )}
         <div className="h-16" />
       </motion.div>
     </div>
   );
 }
 
-interface StudyLogItemProps {
-  log: StudyLog;
+// --- ClassBlockItem Component (Unchanged Style) ---
+interface ClassBlockItemProps {
+  log: ClassBlock;
   onClick: () => void;
 }
 
-function StudyLogItem({ log, onClick }: StudyLogItemProps) {
+function ClassBlockItem({ log, onClick }: ClassBlockItemProps) {
   const [isHovered, setIsHovered] = useState(false);
   const itemRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
@@ -151,16 +147,13 @@ function StudyLogItem({ log, onClick }: StudyLogItemProps) {
 
   const handleMouseEnter = (ev: React.MouseEvent<HTMLDivElement>) => {
     if (!itemRef.current || !overlayRef.current) return;
-
     const rect = itemRef.current.getBoundingClientRect();
     const x = ev.clientX - rect.left;
     const y = ev.clientY - rect.top;
     const edge = findClosestEdge(x, y, rect.width, rect.height);
-
     overlayRef.current.style.transform = `translate3d(0, ${
       edge === "top" ? "-100%" : "100%"
     }, 0)`;
-
     requestAnimationFrame(() => {
       if (overlayRef.current) {
         overlayRef.current.style.transform = "translate3d(0, 0%, 0)";
@@ -171,16 +164,13 @@ function StudyLogItem({ log, onClick }: StudyLogItemProps) {
 
   const handleMouseLeave = (ev: React.MouseEvent<HTMLDivElement>) => {
     if (!itemRef.current || !overlayRef.current) return;
-
     const rect = itemRef.current.getBoundingClientRect();
     const x = ev.clientX - rect.left;
     const y = ev.clientY - rect.top;
     const edge = findClosestEdge(x, y, rect.width, rect.height);
-
     overlayRef.current.style.transform = `translate3d(0, ${
       edge === "top" ? "-100%" : "100%"
     }, 0)`;
-
     setIsHovered(false);
   };
 
@@ -209,7 +199,6 @@ function StudyLogItem({ log, onClick }: StudyLogItemProps) {
           transition: "transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)",
         }}
       />
-
       {/* Right Arrow on Hover */}
       <div
         className={`absolute top-1/2 right-4 -translate-y-1/2 text-white transition-all duration-300 text-2xl z-20
@@ -218,7 +207,6 @@ function StudyLogItem({ log, onClick }: StudyLogItemProps) {
       >
         →
       </div>
-
       {/* Content - changes color only when isHovered */}
       <div
         className={`grid grid-cols-1 md:grid-cols-2 gap-8 px-4 py-6 relative z-10 transition-colors duration-300 ${
@@ -230,7 +218,6 @@ function StudyLogItem({ log, onClick }: StudyLogItemProps) {
           <h2 className="font-medium text-base">{log.className}</h2>
           <div className="text-sm opacity-70">{log.date}</div>
         </div>
-
         {/* Topics */}
         <div className="space-y-1 text-left">
           {log.topics.length > 0 ? (
