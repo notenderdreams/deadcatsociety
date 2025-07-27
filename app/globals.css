@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@plugin '../lib/hero.ts';
 
 @font-face {
   font-family: 'FreightDispPro';
