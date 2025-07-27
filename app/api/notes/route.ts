@@ -1,17 +1,30 @@
-// /api/notes/route.ts
-import { NextResponse } from 'next/server';
-import { mockDatabase } from '@/lib/mock'; // Adjust the import path if needed
+// app/api/notes/route.ts
+import { db } from "@/lib/drizzle"; // your drizzle client
+import { semesters, courses, classes } from "@/lib/schema";
+import { eq } from "drizzle-orm";
+import { NextResponse } from "next/server";
 
 export async function GET() {
-  // In a real scenario, you would fetch from the database here.
-  // For now, we just return the mock data.
   try {
-    // Simulate a slight delay to mimic network request (optional)
-    // await new Promise(resolve => setTimeout(resolve, 500));
+    const semesterRows = await db.select().from(semesters);
+    const courseRows = await db.select().from(courses);
+    const classRows = await db.select().from(classes);
 
-    return NextResponse.json(mockDatabase);
+    const data = {
+      semesters: semesterRows.map((semester) => ({
+        ...semester,
+        courses: courseRows
+          .filter((c) => c.semester_id === semester.id)
+          .map((course) => ({
+            ...course,
+            classes: classRows.filter((cls) => cls.course_id === course.id),
+          })),
+      })),
+    };
+
+    return NextResponse.json(data);
   } catch (error) {
-    console.error("Error fetching mock data:", error);
-    return NextResponse.json({ error: "Failed to load mock data" }, { status: 500 });
+    console.error("Fetch error:", error);
+    return NextResponse.json({ error: "Failed to load data" }, { status: 500 });
   }
 }

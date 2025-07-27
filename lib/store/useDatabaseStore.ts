@@ -58,7 +58,7 @@ export const useDatabaseStore = create<DatabaseState>()((set, get) => ({
   getCourseByCode: (code) => {
     for (const semester of get().data.semesters) {
       // Requires MockCourse to have a 'code' property
-      const course = semester.courses.find((c) => c.code === code);
+      const course = semester.courses.find((c) => c.id === code);
       if (course) return course;
     }
     return undefined;
@@ -94,31 +94,21 @@ export const useDatabaseStore = create<DatabaseState>()((set, get) => ({
   },
 }));
 
-// Hook for initializing data
 export const useInitializeDatabase = () => {
   const { setData, setLoading, setError } = useDatabaseStore();
 
   return async () => {
-    // Check if data is already loaded
-    if (useDatabaseStore.getState().data.semesters.length > 0) {
-      console.log("Data already initialized.");
-      return;
-    }
+    if (useDatabaseStore.getState().data.semesters.length > 0) return;
 
     setLoading(true);
-    setError(null);
     try {
-      console.log("Initializing with mock data...");
-      // Set data using the imported mock data structure
-      setData(mockDatabase);
-      console.log("Data initialized successfully.");
+      const res = await fetch("/api/notes");
+      const json = await res.json();
+      setData(json); // Matches MockDatabase shape
     } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "Failed to load data";
-      console.error("Error initializing database store:", errorMessage);
-      setError(errorMessage);
-    } finally {
-      // setLoading(false); // Not strictly needed as setData handles it
+      const msg = err instanceof Error ? err.message : "Unknown error";
+      console.error("Initialization failed:", msg);
+      setError(msg);
     }
   };
 };
