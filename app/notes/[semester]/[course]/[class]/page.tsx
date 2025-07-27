@@ -1,20 +1,25 @@
 "use client";
 
-import { useMemo } from "react"; 
-import { useParams } from "next/navigation"; 
+import { useMemo } from "react";
+import { useParams } from "next/navigation";
 import { Download, Pencil } from "lucide-react";
 import { Button } from "@heroui/react";
 import ClassNavPanel from "@/components/ClassNavPanel";
-import { useDatabaseStore } from "@/lib/store/useDatabaseStore"; 
+import { useDatabaseStore } from "@/lib/store/useDatabaseStore";
+import {
+  DatabaseClass,
+  DatabaseCourse,
+  DatabaseSemester,
+} from "@/types/models";
 
 interface ClassDetailData {
-  semesterName: string; 
+  semesterName: string;
   courseCode: string;
   courseName: string;
   classTitle: string;
   description: string;
   topics: string[];
-  notesFile?: { name: string; url: string }; 
+  notesFile?: { name: string; url: string };
   references: string[];
   contributors: string[];
   lastUpdated: string;
@@ -26,7 +31,7 @@ export default function ClassDetailPage() {
 
   const { getClassById } = useDatabaseStore();
 
-  const classData = useMemo(() => {
+  const classData: DatabaseClass  = useMemo(() => {
     if (!classParam) return null;
     return getClassById(classParam);
   }, [classParam, getClassById]);
@@ -34,30 +39,40 @@ export default function ClassDetailPage() {
   const pageData: ClassDetailData | null = useMemo(() => {
     if (!classData) return null;
 
-    const { getCourseById } = useDatabaseStore.getState(); 
-    const course = getCourseById(classData.course_id);
+    const { getCourseById, getSemesterById } = useDatabaseStore.getState();
+
+    const course: DatabaseCourse | undefined = getCourseById(
+      classData.course_id
+    );
     if (!course) return null;
 
-    const { getSemesterById } = useDatabaseStore.getState();
-    const semester = getSemesterById(course.semester_id);
+    const semester: DatabaseSemester | undefined = getSemesterById(
+      course.semester_id
+    );
     if (!semester) return null;
+
+    const notesFile =
+      classData.notes && classData.notes.length > 0
+        ? (() => {
+            const raw = classData.notes[0];
+            const [name, url] = raw.includes("::")
+              ? raw.split("::")
+              : [`Notes for ${classData.title}`, raw];
+            return { name, url };
+          })()
+        : undefined;
 
     return {
       semesterName: semester.name,
       courseCode: course.id,
       courseName: course.name,
       classTitle: classData.title,
-      description: classData.description, 
+      description: classData.description,
       topics: classData.topics || [],
-      notesFile:
-        classData.notes && classData.notes.length > 0
-          ? { name: `Notes for ${classData.title}`, url: classData.notes[0] }
-          : undefined,
-      references: classData.references || [], 
-      contributors: classData.contributors, 
-      lastUpdated: new Date(
-        classData.updated_at 
-      ).toLocaleDateString("en-US", {
+      notesFile,
+      references: classData.references || [],
+      contributors: classData.contributors || [],
+      lastUpdated: new Date(classData.updated_at).toLocaleDateString("en-US", {
         month: "long",
         day: "numeric",
         year: "numeric",
@@ -75,11 +90,12 @@ export default function ClassDetailPage() {
 
   return (
     <div className="flex min-h-screen">
-      {/* Sidebar (1/5) */}
-      <div className="w-1/5 ml-24 ">
+      {/* Sidebar */}
+      <div className="w-1/5 ml-24">
         <ClassNavPanel />
       </div>
-      {/* Main Content (4/5) */}
+
+      {/* Main Content */}
       <div className="w-4/5 bg-neutral-100 px-4 py-10 flex flex-col items-center">
         {/* Top Bar */}
         <div className="flex justify-between items-center w-full max-w-5xl mb-6">
@@ -94,33 +110,26 @@ export default function ClassDetailPage() {
             Edit
           </Button>
         </div>
+
         {/* Content Grid */}
         <div className="grid grid-cols-3 border-t border-l border-neutral-300 max-w-5xl w-full">
           {/* Title */}
           <div className="border-b border-r border-neutral-300 p-6 h-48 flex items-center justify-center text-2xl font-bold col-span-3">
             {pageData.classTitle}
           </div>
+
           {/* Description */}
-          {/* Note: If content is a URL, you might want to fetch and render it, or link to it */}
           <div className="border-b border-r border-neutral-300 p-6 col-span-2">
             <h2 className="font-semibold text-lg mb-2">Description</h2>
-            {/* Simple display - consider markdown rendering or iframe for URLs */}
             <p className="text-sm text-neutral-700">{pageData.description}</p>
-            {/* Example for linking if it's a URL:
-            {pageData.description.startsWith('http') ? (
-              <a href={pageData.description} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">
-                View Full Content
-              </a>
-            ) : (
-              <p className="text-sm text-neutral-700">{pageData.description}</p>
-            )}
-            */}
           </div>
+
           {/* Last Updated */}
           <div className="border-b border-r border-neutral-300 p-6">
             <h2 className="font-semibold text-lg mb-2">Last Updated</h2>
             <p className="text-sm text-neutral-500">{pageData.lastUpdated}</p>
           </div>
+
           {/* Topics */}
           <div className="border-b border-r border-neutral-300 p-6 col-span-3">
             <h2 className="font-semibold text-lg mb-2">Topics Covered</h2>
@@ -136,8 +145,8 @@ export default function ClassDetailPage() {
               </p>
             )}
           </div>
+
           {/* Notes */}
-          {/* Conditional rendering if notesFile exists */}
           {pageData.notesFile && (
             <div className="border-b border-r border-neutral-300 p-6 col-span-2">
               <h2 className="font-semibold text-lg mb-2">Notes</h2>
@@ -151,6 +160,7 @@ export default function ClassDetailPage() {
               </a>
             </div>
           )}
+
           {/* Contributors */}
           <div className="border-b border-r border-neutral-300 p-6">
             <h2 className="font-semibold text-lg mb-2">Contributors</h2>
@@ -162,13 +172,13 @@ export default function ClassDetailPage() {
               ))}
             </ul>
           </div>
+
           {/* References */}
           <div className="border-b border-r border-neutral-300 p-6 col-span-3">
             <h2 className="font-semibold text-lg mb-2">References</h2>
             {pageData.references.length > 0 ? (
               <ul className="list-disc list-inside text-sm text-neutral-700 space-y-1">
                 {pageData.references.map((ref, idx) => (
-                  // Consider making these links if they are URLs
                   <li key={idx}>
                     {ref.startsWith("http") ? (
                       <a
