@@ -1,10 +1,9 @@
-// notes/[semester]/page.tsx
 "use client";
 import React, { useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { GridPattern } from "@/components/magicui/grid-pattern";
 import { useParams, useRouter } from "next/navigation";
-import { useDatabaseStore } from "@/lib/store/useDatabaseStore"; // Ensure path is correct
+import { useDatabaseStore } from "@/lib/store/useDatabaseStore";
 
 export default function SemesterGrid() {
   const router = useRouter();
@@ -19,7 +18,6 @@ export default function SemesterGrid() {
       if (!isNaN(id)) {
         return getSemesterById(id);
       } else {
-        // Fallback: Find by name (slugified), if needed
         return useDatabaseStore
           .getState()
           .data.semesters.find(
@@ -32,14 +30,12 @@ export default function SemesterGrid() {
     return getActiveSemester();
   }, [semesterParam, getSemesterById, getActiveSemester]);
 
-  // Derive course data for display, using properties that exist
   const courses = useMemo(() => {
     return (
-      semesterData?.courses.map((course) => ({
+      semesterData?.courses?.map((course) => ({
         id: course.id,
-        name: course.name, // Use 'name' for display
-        // code: course.code, // Removed - 'code' doesn't exist in mockData.ts MockCourse
-        classes: course.classes.length,
+        name: course.name, 
+        classes: course.classes?.length || 0,
         lastUpdated: new Date(course.updated_at).toLocaleDateString("en-US", {
           month: "long",
           day: "numeric",
@@ -49,24 +45,14 @@ export default function SemesterGrid() {
     );
   }, [semesterData]);
 
-  // --- FIXED: Correctly formatted handleCourseClick using course.id ---
   const handleCourseClick = (courseId: string) => {
     if (!semesterData?.id) {
       console.error("Semester data or ID is missing");
       return;
     }
 
-    // Find the course object to get its ID (which we already have) or other details if needed
-    // const course = semesterData.courses.find((c) => c.id === courseId);
-    // if (course) {
-    // Navigate using the course ID directly
-    // The [course] page will need to find the course by this ID
     router.push(`/notes/${semesterData.id}/${courseId}`);
-    // }
-    // Simplified: We already have courseId, no need to re-find it just to get the same ID
-    // router.push(`/notes/${semesterData.id}/${courseId}`);
   };
-  // --- End FIXED handleCourseClick ---
 
   if (!semesterData) {
     return (
@@ -89,7 +75,7 @@ export default function SemesterGrid() {
             <div
               key={course.id}
               className="relative border-b border-r border-neutral-300 p-8 h-64 flex flex-col justify-between cursor-pointer group overflow-hidden transition-colors duration-300 hover:bg-neutral-900"
-              onClick={() => handleCourseClick(course.id)} // Pass course ID
+              onClick={() => handleCourseClick(course.id)} 
             >
               <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-0">
                 <div className="relative flex size-full items-center justify-center overflow-hidden rounded-lg p-20">
@@ -106,9 +92,8 @@ export default function SemesterGrid() {
                   />
                 </div>
               </div>
-              {/* --- FIXED: Display course.name instead of non-existent course.code --- */}
               <div className="relative z-10 text-2xl font-semibold group-hover:text-white transition-colors duration-300">
-                {course.name} {/* Display the course name */}
+                {course.name} 
               </div>
               <div className="relative z-10 text-sm group-hover:text-neutral-300 transition-colors duration-300">
                 {course.classes} classes

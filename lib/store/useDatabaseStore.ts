@@ -1,14 +1,20 @@
-import { DatabaseClass, DatabaseCourse, DatabaseSemester, DatabaseStructure } from "@/types/models";
+import {
+  DatabaseClass,
+  DatabaseCourse,
+  DatabaseSemester,
+  DatabaseStructure,
+} from "@/types/models";
 import { create } from "zustand";
-
 
 interface DatabaseState {
   data: DatabaseStructure;
   isLoading: boolean;
   error: string | null;
+  isInitialized: boolean;
   setData: (newData: DatabaseStructure) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
+  setInitialized: (initialized: boolean) => void;
   getActiveSemester: () => DatabaseSemester | undefined;
   getSemesterById: (id: number) => DatabaseSemester | undefined;
   getCourseById: (id: string) => DatabaseCourse | undefined;
@@ -21,9 +27,11 @@ export const useDatabaseStore = create<DatabaseState>()((set, get) => ({
   data: { semesters: [] },
   isLoading: false,
   error: null,
+  isInitialized: false,
   setData: (newData) => set({ data: newData, isLoading: false, error: null }),
   setLoading: (loading) => set({ isLoading: loading }),
   setError: (error) => set({ error, isLoading: false }),
+  setInitialized: (initialized) => set({ isInitialized: initialized }),
   getActiveSemester: () => {
     return get().data.semesters.find((s) => s.is_active);
   },
@@ -63,12 +71,16 @@ export const useDatabaseStore = create<DatabaseState>()((set, get) => ({
 }));
 
 export const useInitializeDatabase = () => {
-  const { setData, setLoading, setError } = useDatabaseStore();
+  const { setData, setLoading, setError, setInitialized, isInitialized } =
+    useDatabaseStore(); 
+
   return async () => {
-    if (useDatabaseStore.getState().data.semesters.length > 0) {
-      console.log("Database already initialized or loading.");
+    if (isInitialized) {
+      console.log("Database initialization already attempted.");
       return;
     }
+    setInitialized(true);
+
     setLoading(true);
     setError(null);
     try {

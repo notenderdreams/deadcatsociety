@@ -22,6 +22,7 @@ export interface DatabaseClass {
     id: number;
     name: string;
     is_active: boolean;
+    image: string ;
     courses?: DatabaseCourse[];
   }
   

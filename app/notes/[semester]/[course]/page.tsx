@@ -259,4 +259,3 @@ function StudyLogItem({ log, onClick }: StudyLogItemProps) {
     </motion.div>
   );
 }
-// --- End StudyLogItem Component ---
