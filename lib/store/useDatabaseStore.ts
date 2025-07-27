@@ -1,14 +1,13 @@
 // lib/store/useDatabaseStore.ts
 import { create } from "zustand";
-import { persist, createJSONStorage } from "zustand/middleware"; // Optional: for persistence
 import {
   mockDatabase,
   MockDatabase,
   MockSemester,
   MockCourse,
-  MockNote,
-} from "@/lib/mock"; // Adjust path if needed
-// Removed unused imports: error, get, and individual helper functions that are now defined in the store
+  // Renamed import back to MockClass to match mockData.ts
+  MockClass,
+} from "@/lib/mock"; // Adjust path if needed to point to the correct mock file
 
 // Define the shape of your Zustand store state
 interface DatabaseState {
@@ -18,114 +17,108 @@ interface DatabaseState {
   isLoading: boolean;
   error: string | null;
   // Actions to update the state
-  setData: (newData: MockDatabase) => void; // Added type for newData parameter
+  setData: (newData: MockDatabase) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
-  // Optional: Derived selectors or helper actions can be added here or inline in components
-  // Example derived selector (we'll use this pattern in components too)
+  // Derived selectors or helper actions
   getActiveSemester: () => MockSemester | undefined;
   getSemesterById: (id: number) => MockSemester | undefined;
+  // Note: getCourseByCode requires 'code' field in MockCourse (not present in provided mockData.ts)
+  // Keeping it if you plan to add 'code' later, but it won't work with current mockData.ts
   getCourseByCode: (code: string) => MockCourse | undefined;
-  getCourseById: (id: string) => MockCourse | undefined; // Add this for convenience
-  getClassById: (id: string) => MockNote | undefined;
+  getCourseById: (id: string) => MockCourse | undefined; // Find course by its ID
+  // Updated return type to MockClass
+  getClassById: (id: string) => MockClass | undefined;
   getCoursesForSemester: (semesterId: number) => MockCourse[];
-  getClassesForCourse: (courseId: string) => MockNote[]; // Note: courseId is a string (UUID)
+  // Updated return type to MockClass[]
+  getClassesForCourse: (courseId: string) => MockClass[];
 }
 
 // Create the Zustand store
-export const useDatabaseStore = create<DatabaseState>()(
-  // Optional: Add persistence if you want the data to survive page reloads (requires data to be serializable)
-  // persist(
-  (set, get) => ({
-    // Initial state - FIXED THE SYNTAX ERROR HERE
-    data: { semesters: [] }, // Start with empty data - Added 'data:' key
-    isLoading: false,
-    error: null,
+export const useDatabaseStore = create<DatabaseState>()((set, get) => ({
+  // Initial state
+  data: { semesters: [] },
+  isLoading: false,
+  error: null,
 
-    // Actions
-    setData: (newData) => set({ data: newData, isLoading: false, error: null }), // Added 'data:' key
-    setLoading: (loading) => set({ isLoading: loading }),
-    setError: (error) => set({ error, isLoading: false }),
+  // Actions
+  setData: (newData) => set({ data: newData, isLoading: false, error: null }),
+  setLoading: (loading) => set({ isLoading: loading }),
+  setError: (error) => set({ error, isLoading: false }),
 
-    // Derived Selectors / Helpers (These don't change state, just compute from it)
-    getActiveSemester: () => {
-      return get().data.semesters.find((s) => s.is_active);
-    },
-    getSemesterById: (id) => {
-      return get().data.semesters.find((s) => s.id === id);
-    },
-    getCourseByCode: (code) => {
-      for (const semester of get().data.semesters) {
-        const course = semester.courses.find((c) => c.code === code);
-        if (course) return course;
+  // Derived Selectors / Helpers
+  getActiveSemester: () => {
+    return get().data.semesters.find((s) => s.is_active);
+  },
+  getSemesterById: (id) => {
+    return get().data.semesters.find((s) => s.id === id);
+  },
+  // This will not work correctly with the provided mockData.ts as MockCourse lacks 'code'
+  // It requires MockCourse to have a 'code' field.
+  getCourseByCode: (code) => {
+    for (const semester of get().data.semesters) {
+      // Requires MockCourse to have a 'code' property
+      const course = semester.courses.find((c) => c.code === code);
+      if (course) return course;
+    }
+    return undefined;
+  },
+  // Find a course by its unique ID (matches mockData.ts MockCourse.id)
+  getCourseById: (id) => {
+    for (const semester of get().data.semesters) {
+      const course = semester.courses.find((c) => c.id === id);
+      if (course) return course;
+    }
+    return undefined;
+  },
+  // Updated return type and logic to use MockClass
+  getClassById: (id) => {
+    for (const semester of get().data.semesters) {
+      for (const course of semester.courses) {
+        // Accesses the 'classes' array of MockCourse
+        const cls = course.classes.find((c) => c.id === id);
+        if (cls) return cls; // Returns MockClass object
       }
-      return undefined;
-    },
-    // Find a course by its unique ID
-    getCourseById: (id) => {
-      for (const semester of get().data.semesters) {
-        const course = semester.courses.find((c) => c.id === id);
-        if (course) return course;
-      }
-      return undefined;
-    },
-    getClassById: (id) => {
-      for (const semester of get().data.semesters) {
-        for (const course of semester.courses) {
-          const cls = course.classes.find((c) => c.id === id);
-          if (cls) return cls;
-        }
-      }
-      return undefined;
-    },
-    getCoursesForSemester: (semesterId) => {
-      const semester = get().getSemesterById(semesterId);
-      return semester ? semester.courses : [];
-    },
-    getClassesForCourse: (courseId) => {
-      const course = get().getCourseById(courseId); // Use the new helper
-      return course ? course.classes : [];
-    },
-  })
-  //   {
-  //     name: 'database-storage', // Name of the item in storage
-  //     storage: createJSONStorage(() => localStorage), // Use localStorage
-  //   }
-  // )
-);
+    }
+    return undefined;
+  },
+  getCoursesForSemester: (semesterId) => {
+    const semester = get().getSemesterById(semesterId);
+    return semester ? semester.courses : [];
+  },
+  // Updated return type and logic to use MockClass
+  getClassesForCourse: (courseId) => {
+    const course = get().getCourseById(courseId);
+    // Accesses the 'classes' array of MockCourse and returns MockClass[]
+    return course ? course.classes : [];
+  },
+}));
 
-// Optional: Create a hook for initializing data (e.g., in a layout or root component)
+// Hook for initializing data
 export const useInitializeDatabase = () => {
   const { setData, setLoading, setError } = useDatabaseStore();
 
   return async () => {
+    // Check if data is already loaded
     if (useDatabaseStore.getState().data.semesters.length > 0) {
-      // Data already loaded, maybe check freshness or skip
-      console.log("Mock data already initialized.");
+      console.log("Data already initialized.");
       return;
     }
 
     setLoading(true);
     setError(null);
     try {
-      // In a real app, you'd fetch from `/api/notes`
-      // const response = await fetch('/api/notes');
-      // const fetchedData: MockDatabase = await response.json();
-
-      // For now, simulate fetching with mock data
-      // You can replace this with the actual fetch call above later.
       console.log("Initializing with mock data...");
-      // Simulate network delay
-      // await new Promise(resolve => setTimeout(resolve, 800));
-      setData(mockDatabase); // Use the imported mock data
-      console.log("Mock data initialized successfully.");
+      // Set data using the imported mock data structure
+      setData(mockDatabase);
+      console.log("Data initialized successfully.");
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to load data";
       console.error("Error initializing database store:", errorMessage);
       setError(errorMessage);
     } finally {
-      // setLoading(false); // Not needed here as setData sets loading to false
+      // setLoading(false); // Not strictly needed as setData handles it
     }
   };
 };

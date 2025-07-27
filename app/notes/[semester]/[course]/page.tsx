@@ -1,8 +1,8 @@
 // notes/[semester]/[course]/page.tsx
 "use client";
 
-import { useRef, useState, useMemo } from "react"; // Add useMemo
-import { useRouter, useParams } from "next/navigation"; // Add useParams
+import { useRef, useState, useMemo } from "react";
+import { useRouter, useParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { Button } from "@heroui/react";
 import { PlusIcon } from "lucide-react";
@@ -11,20 +11,20 @@ import { useDatabaseStore } from "@/lib/store/useDatabaseStore"; // Import store
 interface StudyLog {
   id: string;
   className: string;
-  // courseCode: string; // Might not be needed if we get it from context
-  // semester: string; // Might not be needed if we get it from context
   date: string;
   topics: string[];
 }
 
 export default function App() {
+  // Renamed component for clarity, adjust export default if needed in your file
   const router = useRouter();
   const params = useParams();
   const semesterParam = params.semester as string;
-  const courseParam = params.course as string;
+  const courseParam = params.course as string; // This is now expected to be the course ID (e.g., "CSE2101")
 
   // --- Zustand Integration ---
-  const { getSemesterById, getCourseByCode } = useDatabaseStore();
+  // Use getCourseById instead of getCourseByCode
+  const { getSemesterById, getCourseById } = useDatabaseStore();
 
   // Find the semester object
   const semesterData = useMemo(() => {
@@ -32,18 +32,30 @@ export default function App() {
     if (!isNaN(id)) {
       return getSemesterById(id);
     }
-    // Add logic for name lookup if needed, similar to above
     return undefined;
   }, [semesterParam, getSemesterById]);
 
-  // Find the specific course within that semester
-  // We need to find the course by its *code* which matches the URL param
+  // --- FIXED: Find the specific course by its ID ---
+  // The URL param (courseParam) is now the course ID (e.g., "CSE2101")
   const courseData = useMemo(() => {
     if (!semesterData || !courseParam) return undefined;
-    // The URL param is likely "CSE-4301", convert back to "CSE4301" to match data
-    const formattedCourseCode = courseParam.replace(/-/g, " ");
-    return semesterData.courses.find((c) => c.code === formattedCourseCode);
-  }, [semesterData, courseParam]);
+
+    // Find the course within the semester's courses array by matching course.id
+    // with the courseParam (which is the course ID passed in the URL)
+    // First, find the course in the semester data
+    const foundCourse = semesterData.courses.find((c) => c.id === courseParam);
+
+    // If not found in the specific semester, fallback to global search (less efficient, but robust)
+    if (foundCourse) {
+      return foundCourse;
+    }
+    // Fallback: Search globally using the store's helper if needed
+    // This is useful if the URL structure allows accessing courses directly
+    // or if there's a chance the course isn't under the expected semester in mock data.
+    // Ensure getCourseById searches by .id, not .code (as corrected in Zustand store).
+    return getCourseById(courseParam); // Use the global helper as a fallback
+  }, [semesterData, courseParam, getCourseById]); // Add getCourseById to dependencies
+  // --- End FIXED course lookup ---
 
   // Derive study logs (classes) from the course data
   const studyLogs: StudyLog[] = useMemo(() => {
@@ -51,15 +63,13 @@ export default function App() {
     return courseData.classes.map((cls) => ({
       id: cls.id,
       className: cls.title,
-      // courseCode and semester can be derived from context/route if needed, or passed down
-      // For simplicity, we can pass them or get them from the URL/context
-      // date: new Date(cls.created_at).toLocaleDateString('en-US', options),
-      date: new Date(cls.created_at).toLocaleDateString("en-US", {
+      date: new Date(cls.updated_at).toLocaleDateString("en-US", {
+        // Use updated_at or created_at
         month: "short",
         day: "numeric",
         year: "numeric",
       }),
-      topics: cls.topics || [], // Ensure topics is an array
+      topics: cls.topics || [],
     }));
   }, [courseData]);
   // --- End Zustand Integration ---
@@ -76,23 +86,27 @@ export default function App() {
   if (!courseData) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        Course not found.
+        Course not found. (Semester ID: {semesterParam}, Course ID/Param:{" "}
+        {courseParam})
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-white text-black">
+      {/* --- FIXED: Display course.name, removed non-existent course.code --- */}
       <div className="px-96 py-16 flex justify-between">
         <h1 className="text-4xl font-serif">
-          {courseData.name} ({courseData.code})
-        </h1>{" "}
-        {/* Use name and code from data */}
+          {courseData.name} {/* Display the course name */}
+          {/* ({courseData.code}) Removed - code doesn't exist in MockCourse */}
+        </h1>
         <Button className="bg-black text-white ">
           <PlusIcon size={16} />
           New Class
         </Button>
       </div>
+      {/* --- End FIXED title --- */}
+
       <motion.div
         className="max-w-6xl mx-auto px-8 pb-16"
         initial="hidden"
@@ -111,7 +125,7 @@ export default function App() {
             <StudyLogItem
               key={log.id}
               log={log}
-              onClick={() => handleClassClick(log.id)} // Pass the class ID
+              onClick={() => handleClassClick(log.id)}
             />
           ))
         ) : (
@@ -125,7 +139,7 @@ export default function App() {
   );
 }
 
-// --- StudyLogItem remains mostly the same, just ensure it uses the correct props ---
+// --- StudyLogItem Component (Unchanged Style) ---
 interface StudyLogItemProps {
   log: StudyLog;
   onClick: () => void;
@@ -245,3 +259,4 @@ function StudyLogItem({ log, onClick }: StudyLogItemProps) {
     </motion.div>
   );
 }
+// --- End StudyLogItem Component ---

@@ -52,20 +52,20 @@ export default function ClassDetailPage() {
 
     return {
       semesterName: semester.name,
-      courseCode: course.code,
+      courseCode: course.id,
       courseName: course.name,
       classTitle: classData.title,
-      description: classData.content, // Assuming 'content' holds the description text/URL
+      description: classData.description, // Assuming 'content' holds the description text/URL
       topics: classData.topics || [],
       // Handle notes file - assuming the first note link is the main one, or handle differently
       notesFile:
         classData.notes && classData.notes.length > 0
           ? { name: `Notes for ${classData.title}`, url: classData.notes[0] }
           : undefined,
-      references: classData.resources || [], // Map 'resources' to 'references'
-      contributors: [classData.uploaded_by], // Wrap single contributor in array, or handle array if data changes
+      references: classData.references || [], // Map 'resources' to 'references'
+      contributors: classData.contributors, // Wrap single contributor in array, or handle array if data changes
       lastUpdated: new Date(
-        classData.updated_at || classData.created_at
+        classData.updated_at 
       ).toLocaleDateString("en-US", {
         month: "long",
         day: "numeric",
