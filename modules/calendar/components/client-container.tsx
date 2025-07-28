@@ -1,16 +1,11 @@
 "use client";
-
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { isSameMonth, parseISO } from "date-fns";
-
 import { useCalendar } from "@/modules/calendar/contexts/calendar-context";
-
 import { DndProviderWrapper } from "@/modules/calendar/components/dnd/dnd-provider";
-
 import { CalendarHeader } from "@/modules/calendar/components/header/calendar-header";
 import { CalendarMonthView } from "@/modules/calendar/components/month-view/calendar-month-view";
 import { CalendarAgendaView } from "@/modules/calendar/components/agenda-view/calendar-agenda-view";
-
 import type { TCalendarView } from "@/modules/calendar/types";
 
 interface IProps {
@@ -19,6 +14,7 @@ interface IProps {
 
 export function ClientContainer({ view }: IProps) {
   const { selectedDate, events } = useCalendar();
+  const [showAgenda, setShowAgenda] = useState(true);
 
   const filteredEvents = useMemo(() => {
     return events.filter((event) => {
@@ -29,11 +25,33 @@ export function ClientContainer({ view }: IProps) {
 
   return (
     <div className="overflow-hidden">
+      <div className="flex gap-12">
       <CalendarHeader view={view} events={filteredEvents} />
-      <div className="border border-t-0">
+      {/* Toggle Button */}
+      <div className="mb-4 px-4">
+        <button
+          onClick={() => setShowAgenda(!showAgenda)}
+          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+        >
+          {showAgenda ? "Hide Agenda" : "Show Agenda"}
+        </button>
+      </div>
+      </div>
+
+
+
+      <div className="">
         <DndProviderWrapper>
-          {view === "month" && <CalendarMonthView events={filteredEvents} />}
-          {view === "agenda" && <CalendarAgendaView events={filteredEvents} />}
+          <div className="flex gap-16">
+            <div className="border">
+              <CalendarMonthView events={filteredEvents} />
+            </div>
+            {showAgenda && (
+              <div className="border">
+                <CalendarAgendaView events={filteredEvents} />
+              </div>
+            )}
+          </div>
         </DndProviderWrapper>
       </div>
     </div>
