@@ -1,9 +1,6 @@
 import { useMemo } from "react";
-import { formatDate } from "date-fns";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-
 import { useCalendar } from "@/modules/calendar/contexts/calendar-context";
-
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
@@ -24,9 +21,6 @@ interface IProps {
 export function DateNavigator({ view, events }: IProps) {
   const { selectedDate, setSelectedDate } = useCalendar();
 
-  const month = formatDate(selectedDate, "MMMM");
-  const year = selectedDate.getFullYear();
-
   const eventCount = useMemo(
     () => getEventsCount(events, selectedDate),
     [events, selectedDate]
@@ -40,9 +34,7 @@ export function DateNavigator({ view, events }: IProps) {
   return (
     <div className="space-y-0.5">
       <div className="flex items-center gap-2">
-        <span className="text-lg font-semibold">
-          {month} {year}
-        </span>
+ 
         <Badge variant="outline" className="px-1.5">
           {eventCount} events
         </Badge>
@@ -69,6 +61,7 @@ export function DateNavigator({ view, events }: IProps) {
           <ChevronRight />
         </Button>
       </div>
+      
     </div>
   );
 }

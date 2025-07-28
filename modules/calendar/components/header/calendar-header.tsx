@@ -8,6 +8,7 @@ import { AddEventDialog } from "@/modules/calendar/components/dialogs/add-event-
 
 import type { IEvent } from "@/modules/calendar/interfaces";
 import type { TCalendarView } from "@/modules/calendar/types";
+import { formatDate } from "date-fns";
 
 interface IProps {
   view: TCalendarView;
@@ -15,20 +16,31 @@ interface IProps {
 }
 
 export function CalendarHeader({ view, events }: IProps) {
+  const today = new Date();
   return (
-    <div className="flex flex-col gap-4  p-4 lg:flex-row lg:items-center lg:justify-between">
+    <div className=" w-full flex flex-col gap-4  py-4  lg:flex-row lg:items-center lg:justify-between">
       <div className="flex items-center gap-3">
         <TodayButton />
         <DateNavigator view={view} events={events} />
       </div>
 
-      <div className="flex flex-col items-center gap-1.5 sm:flex-row sm:justify-between">
-        <AddEventDialog>
-          <Button className="w-full rounded-md border-2 bg-neutral-800 text-white sm:w-auto">
-            <Plus />
-            Add Event
-          </Button>
-        </AddEventDialog>
+      <div className="flex gap-4 items-center">
+        <div>
+          {/* <AddEventDialog>
+            <Button
+              color="default"
+              size="sm"
+              endContent={<Plus />}
+              className="bg-neutral-800 text-neutral-100 rounded"
+            >
+              Add Event
+            </Button>
+          </AddEventDialog> */}
+        </div>
+        <div className="text-6xl font-bold flex ">
+          {formatDate(today, "MMMM").toUpperCase()}
+          {today.getFullYear()}
+        </div>
       </div>
     </div>
   );

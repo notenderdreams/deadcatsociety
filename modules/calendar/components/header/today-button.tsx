@@ -1,6 +1,6 @@
-import { formatDate } from "date-fns";
 
 import { useCalendar } from "@/modules/calendar/contexts/calendar-context";
+import { Button } from "@heroui/react";
 
 export function TodayButton() {
   const { setSelectedDate } = useCalendar();
@@ -9,16 +9,12 @@ export function TodayButton() {
   const handleClick = () => setSelectedDate(today);
 
   return (
-    <button
-      className="flex size-14 flex-col items-start overflow-hidden rounded-lg border focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-      onClick={handleClick}
-    >
-      <p className="flex h-6 w-full items-center justify-center bg-primary text-center text-xs font-semibold text-primary-foreground">
-        {formatDate(today, "MMM").toUpperCase()}
-      </p>
-      <p className="flex w-full items-center justify-center text-lg font-bold">
-        {today.getDate()}
-      </p>
-    </button>
+    <Button onPress={handleClick} size="lg" color="primary">
+      <div>
+        <div className="text-6xl font-bold text-neutral-100 ">
+          {today.getDate()}
+        </div>
+      </div>
+    </Button>
   );
 }

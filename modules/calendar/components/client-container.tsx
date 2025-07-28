@@ -14,7 +14,7 @@ interface IProps {
 
 export function ClientContainer({ view }: IProps) {
   const { selectedDate, events } = useCalendar();
-  const [showAgenda, setShowAgenda] = useState(true);
+  const [showAgenda, setShowAgenda] = useState(false);
 
   const filteredEvents = useMemo(() => {
     return events.filter((event) => {
@@ -27,15 +27,7 @@ export function ClientContainer({ view }: IProps) {
     <div className="overflow-hidden">
       <div className="flex gap-12">
       <CalendarHeader view={view} events={filteredEvents} />
-      {/* Toggle Button */}
-      <div className="mb-4 px-4">
-        <button
-          onClick={() => setShowAgenda(!showAgenda)}
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-        >
-          {showAgenda ? "Hide Agenda" : "Show Agenda"}
-        </button>
-      </div>
+      
       </div>
 
 
