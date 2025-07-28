@@ -12,13 +12,21 @@ import {
 
 import type { IEvent } from "@/modules/calendar/interfaces";
 import type { TCalendarView } from "@/modules/calendar/types";
+import { cn } from "@/lib/utils";
 
 interface IProps {
   view: TCalendarView;
   events: IEvent[];
+  showAgenda: boolean;
+  onToggleAgenda: () => void;
 }
 
-export function DateNavigator({ view, events }: IProps) {
+export function DateNavigator({
+  view,
+  events,
+  showAgenda,
+  onToggleAgenda,
+}: IProps) {
   const { selectedDate, setSelectedDate } = useCalendar();
 
   const eventCount = useMemo(
@@ -31,11 +39,35 @@ export function DateNavigator({ view, events }: IProps) {
   const handleNext = () =>
     setSelectedDate(navigateDate(selectedDate, view, "next"));
 
+  const handleEventBadgeClick = () => {
+    onToggleAgenda();
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      onToggleAgenda();
+    }
+  };
+
   return (
     <div className="space-y-0.5">
       <div className="flex items-center gap-2">
- 
-        <Badge variant="outline" className="px-1.5">
+        <Badge
+          variant="outline"
+          className={cn(
+            "px-1.5 cursor-pointer transition-colors hover:bg-accent hover:text-accent-foreground select-none",
+            showAgenda &&
+              "bg-primary text-primary-foreground hover:bg-primary/90 border-none "
+          )}
+          onClick={handleEventBadgeClick}
+          onKeyDown={handleKeyDown}
+          tabIndex={0}
+          role="button"
+          aria-label={`${eventCount} events - Click to ${
+            showAgenda ? "hide" : "show"
+          } agenda`}
+        >
           {eventCount} events
         </Badge>
       </div>
@@ -61,7 +93,6 @@ export function DateNavigator({ view, events }: IProps) {
           <ChevronRight />
         </Button>
       </div>
-      
     </div>
   );
 }

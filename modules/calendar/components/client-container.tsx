@@ -23,14 +23,20 @@ export function ClientContainer({ view }: IProps) {
     });
   }, [selectedDate, events]);
 
+  const toggleAgenda = () => {
+    setShowAgenda((prev) => !prev);
+  };
+
   return (
     <div className="overflow-hidden">
       <div className="flex gap-12">
-      <CalendarHeader view={view} events={filteredEvents} />
-      
+        <CalendarHeader
+          view={view}
+          events={filteredEvents}
+          showAgenda={showAgenda}
+          onToggleAgenda={toggleAgenda}
+        />
       </div>
-
-
 
       <div className="">
         <DndProviderWrapper>
