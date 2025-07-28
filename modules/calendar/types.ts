@@ -1,3 +1,4 @@
+// File: types.ts
 export type TCalendarView = "month" | "agenda";
-export type TEventColor = "blue" | "green" | "red" | "yellow" | "purple" | "orange" | "gray";
+export type TEventType = "general" | "club" | "exam" | "deadline" | "rescheduled";
 export type TBadgeVariant = "dot" | "colored" | "mixed";

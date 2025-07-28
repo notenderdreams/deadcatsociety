@@ -131,7 +131,6 @@ export function AddEventDialog({
                 </FormItem>
               )}
             />
-
             <div className="flex items-start gap-2">
               <FormField
                 control={form.control}
@@ -176,65 +175,48 @@ export function AddEventDialog({
                 )}
               />
             </div>
+            // In both add-event-dialog.tsx and edit-event-dialog.tsx // Replace
+            the color select with type select:
             <FormField
               control={form.control}
-              name="color"
+              name="type"
               render={({ field, fieldState }) => (
                 <FormItem>
-                  <FormLabel>Color</FormLabel>
+                  <FormLabel>Event Type</FormLabel>
                   <FormControl>
                     <Select value={field.value} onValueChange={field.onChange}>
                       <SelectTrigger data-invalid={fieldState.invalid}>
-                        <SelectValue placeholder="Select an option" />
+                        <SelectValue placeholder="Select event type" />
                       </SelectTrigger>
-
                       <SelectContent>
-                        <SelectItem value="blue">
+                        <SelectItem value="general">
+                          <div className="flex items-center gap-2">
+                            <div className="size-3.5 rounded-full bg-gray-600" />
+                            General
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="club">
                           <div className="flex items-center gap-2">
                             <div className="size-3.5 rounded-full bg-blue-600" />
-                            Blue
+                            Club
                           </div>
                         </SelectItem>
-
-                        <SelectItem value="green">
-                          <div className="flex items-center gap-2">
-                            <div className="size-3.5 rounded-full bg-green-600" />
-                            Green
-                          </div>
-                        </SelectItem>
-
-                        <SelectItem value="red">
+                        <SelectItem value="exam">
                           <div className="flex items-center gap-2">
                             <div className="size-3.5 rounded-full bg-red-600" />
-                            Red
+                            Exam
                           </div>
                         </SelectItem>
-
-                        <SelectItem value="yellow">
-                          <div className="flex items-center gap-2">
-                            <div className="size-3.5 rounded-full bg-yellow-600" />
-                            Yellow
-                          </div>
-                        </SelectItem>
-
-                        <SelectItem value="purple">
-                          <div className="flex items-center gap-2">
-                            <div className="size-3.5 rounded-full bg-purple-600" />
-                            Purple
-                          </div>
-                        </SelectItem>
-
-                        <SelectItem value="orange">
+                        <SelectItem value="deadline">
                           <div className="flex items-center gap-2">
                             <div className="size-3.5 rounded-full bg-orange-600" />
-                            Orange
+                            Deadline
                           </div>
                         </SelectItem>
-
-                        <SelectItem value="gray">
+                        <SelectItem value="rescheduled">
                           <div className="flex items-center gap-2">
-                            <div className="size-3.5 rounded-full bg-neutral-600" />
-                            Gray
+                            <div className="size-3.5 rounded-full bg-purple-600" />
+                            Rescheduled
                           </div>
                         </SelectItem>
                       </SelectContent>
@@ -244,7 +226,6 @@ export function AddEventDialog({
                 </FormItem>
               )}
             />
-
             <FormField
               control={form.control}
               name="description"

@@ -105,7 +105,7 @@ export function DayCell({ cell, events, eventPositions }: IProps) {
               <div key={eventKey} className="lg:flex-1">
                 {event && (
                   <>
-                    <EventBullet className="lg:hidden" color={event.color} />
+                    <EventBullet className="lg:hidden" type={event.type} />
                     <MonthEventBadge
                       className="hidden lg:flex"
                       event={event}

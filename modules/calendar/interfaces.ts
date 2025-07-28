@@ -1,10 +1,11 @@
-import type { TEventColor } from "@/modules/calendar/types";
+// File: interfaces.ts
+import type { TEventType } from "@/modules/calendar/types";
 
 export interface IEvent {
   id: number;
   date: string;
   title: string;
-  color: TEventColor;
+  type: TEventType;
   description: string;
 }
 
