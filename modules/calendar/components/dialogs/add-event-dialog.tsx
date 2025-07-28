@@ -45,10 +45,22 @@ interface IProps {
   children: React.ReactNode;
   startDate?: Date;
   startTime?: { hour: number; minute: number };
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-export function AddEventDialog({ children, startDate, startTime }: IProps) {
+export function AddEventDialog({
+  children,
+  startDate,
+  startTime,
+  open: controlledOpen,
+  onOpenChange: controlledOnOpenChange,
+}: IProps) {
   const { isOpen, onClose, onToggle } = useDisclosure();
+
+  // Use controlled state if provided, otherwise use internal state
+  const dialogOpen = controlledOpen !== undefined ? controlledOpen : isOpen;
+  const handleOpenChange = controlledOnOpenChange || onToggle;
 
   const form = useForm<TEventFormData>({
     resolver: zodResolver(eventSchema),
@@ -62,19 +74,26 @@ export function AddEventDialog({ children, startDate, startTime }: IProps) {
 
   const onSubmit = (_values: TEventFormData) => {
     // TO DO: Create use-add-event hook
-    onClose();
+    handleOpenChange(false);
     form.reset();
+  };
+
+  const handleClose = () => {
+    handleOpenChange(false);
+    onClose();
   };
 
   useEffect(() => {
     form.reset({
+      title: "",
+      description: "",
       date: startDate,
       startTime,
     });
-  }, [startDate, startTime, form.reset, form]);
+  }, [startDate, startTime, form.reset, form, dialogOpen]);
 
   return (
-    <Dialog open={isOpen} onOpenChange={onToggle}>
+    <Dialog open={dialogOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>{children}</DialogTrigger>
 
       <DialogContent>
@@ -250,7 +269,7 @@ export function AddEventDialog({ children, startDate, startTime }: IProps) {
 
         <DialogFooter>
           <DialogClose asChild>
-            <Button type="button" variant="outline">
+            <Button type="button" variant="outline" onClick={handleClose}>
               Cancel
             </Button>
           </DialogClose>
