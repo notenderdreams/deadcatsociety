@@ -9,16 +9,22 @@ export async function PUT(
 ) {
   try {
     const body = await req.json();
+
     const updatedEvent = await db
       .update(events)
       .set(body)
       .where(eq(events.id, params.id))
       .returning();
+
+    if (updatedEvent.length === 0) {
+      return NextResponse.json({ error: "Event not found" }, { status: 404 });
+    }
+
     return NextResponse.json(updatedEvent[0]);
-  } catch (error) {
-    console.error("Error updating event:", error);
+  } catch (error: any) {
+    console.error("Error updating event (API Route):", error);
     return NextResponse.json(
-      { error: "Failed to update event" },
+      { error: error.message || "Failed to update event" },
       { status: 500 }
     );
   }
@@ -29,7 +35,13 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    await db.delete(events).where(eq(events.id, params.id));
+    const deletedEvent = await db
+      .delete(events)
+      .where(eq(events.id, params.id))
+      .returning();
+    if (deletedEvent.length === 0) {
+      return NextResponse.json({ error: "Event not found" }, { status: 404 });
+    }
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error deleting event:", error);

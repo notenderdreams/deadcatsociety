@@ -1,12 +1,11 @@
+// modules/calendar/components/dialogs/edit-event-dialog.tsx
+// app/modules/calendar/components/dialogs/edit-event-dialog.tsx
 "use client";
 
-import { parseISO } from "date-fns";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-
 import { useDisclosure } from "@/hooks/use-disclosure";
-import { useUpdateEvent } from "@/modules/calendar/hooks/use-update-event";
-
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -29,256 +28,202 @@ import {
 } from "@/components/ui/select";
 import {
   Dialog,
-  DialogHeader,
-  DialogClose,
   DialogContent,
-  DialogTrigger,
+  DialogHeader,
   DialogTitle,
-  DialogDescription,
+  DialogTrigger,
   DialogFooter,
+  DialogClose,
 } from "@/components/ui/dialog";
-
 import { eventSchema } from "@/modules/calendar/schemas";
-
-import type { IEvent } from "@/modules/calendar/interfaces";
+import { useUpdateEvent } from "@/modules/calendar/hooks/use-update-event"; // Ensure using the improved hook
+import { DatabaseEvent } from "@/types/models"; // Adjust import path if needed
 import type { TimeValue } from "react-aria-components";
 import type { TEventFormData } from "@/modules/calendar/schemas";
+import type { IEvent } from "@/modules/calendar/interfaces"; // Adjust import path if needed
 
 interface IProps {
   children: React.ReactNode;
-  event: IEvent;
+  event: IEvent; // Or DatabaseEvent if that's the type used internally
 }
 
 export function EditEventDialog({ children, event }: IProps) {
   const { isOpen, onClose, onToggle } = useDisclosure();
-
-  const { updateEvent } = useUpdateEvent();
+  const { updateEvent } = useUpdateEvent(); // Use the improved hook
 
   const form = useForm<TEventFormData>({
     resolver: zodResolver(eventSchema),
     defaultValues: {
       title: event.title,
-      description: event.description,
-      date: parseISO(event.date),
+      description: event.description || "",
+      date: new Date(event.date),
       startTime: {
-        hour: parseISO(event.date).getHours(),
-        minute: parseISO(event.date).getMinutes(),
+        hour: new Date(event.date).getHours(),
+        minute: new Date(event.date).getMinutes(),
       },
-      type: event.type,
+      type: event.type as any, // Cast if needed, ensure type compatibility
     },
   });
 
-  const onSubmit = (values: TEventFormData) => {
-    const startDateTime = new Date(values.date);
-    startDateTime.setHours(values.startTime.hour, values.startTime.minute);
+  // Reset form when event prop changes (e.g., if dialog is reused for different events)
+  useEffect(() => {
+    if (event) {
+      const eventDate = new Date(event.date);
+      form.reset({
+        title: event.title,
+        description: event.description || "",
+        date: eventDate,
+        startTime: {
+          hour: eventDate.getHours(),
+          minute: eventDate.getMinutes(),
+        },
+        type: event.type as any, // Cast if needed
+      });
+    }
+  }, [event, form]);
 
-    updateEvent({
-      ...event,
-      title: values.title,
-      type: values.type,
-      description: values.description,
-      date: startDateTime.toISOString(),
-    });
+  const onSubmit = async (values: TEventFormData) => {
+    try {
+      const startDateTime = new Date(values.date);
+      startDateTime.setHours(values.startTime.hour, values.startTime.minute);
 
-    onClose();
+      const updatedEventData: DatabaseEvent = {
+        ...event, // Start with existing event data
+        title: values.title,
+        type: values.type,
+        description: values.description || event.description, // Handle potential null/undefined
+        date: startDateTime.toISOString(), // Ensure correct ISO format
+        updated_at: new Date().toISOString(), // Update timestamp
+      };
+
+      await updateEvent(updatedEventData); // Call the improved hook function
+      onClose(); // Close dialog on success
+    } catch (error) {
+      // Error handled by the hook
+      console.error("Update error (handled by hook):", error);
+    }
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onToggle}>
       <DialogTrigger asChild>{children}</DialogTrigger>
-
-      <DialogContent className="max-w-4xl">
+      <DialogContent className="max-w-xl">
         <DialogHeader>
-          <DialogTitle className="text-xl font-semibold">
-            Edit Event
-          </DialogTitle>
+          <DialogTitle>Edit Event</DialogTitle>
         </DialogHeader>
-
         <Form {...form}>
-          <form
-            id="event-form"
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="mt-4"
-          >
-            {/* Content Grid */}
-            <div className="grid grid-cols-3 border-t border-l border-neutral-300 w-full">
-              {/* Title Field */}
-              <div className="border-b border-r border-neutral-300 p-6 col-span-3">
-                <FormField
-                  control={form.control}
-                  name="title"
-                  render={({ field, fieldState }) => (
-                    <FormItem>
-                      <FormLabel
-                        htmlFor="title"
-                        className="font-semibold text-lg mb-2 block"
-                      >
-                        Event Title
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          id="title"
-                          placeholder="Enter a title"
-                          data-invalid={fieldState.invalid}
-                          className="text-sm"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              {/* Date Field */}
-              <div className="border-b border-r border-neutral-300 p-6">
-                <FormField
-                  control={form.control}
-                  name="date"
-                  render={({ field, fieldState }) => (
-                    <FormItem>
-                      <FormLabel
-                        htmlFor="startDate"
-                        className="font-semibold text-lg mb-2 block"
-                      >
-                        Date
-                      </FormLabel>
-                      <FormControl>
-                        <SingleDayPicker
-                          id="startDate"
-                          value={field.value}
-                          onSelect={(date) => field.onChange(date as Date)}
-                          placeholder="Select a date"
-                          data-invalid={fieldState.invalid}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              {/* Time Field */}
-              <div className="border-b border-r border-neutral-300 p-6">
-                <FormField
-                  control={form.control}
-                  name="startTime"
-                  render={({ field, fieldState }) => (
-                    <FormItem>
-                      <FormLabel className="font-semibold text-lg mb-2 block">
-                        Start Time
-                      </FormLabel>
-                      <FormControl>
-                        <TimeInput
-                          value={field.value as TimeValue}
-                          onChange={field.onChange}
-                          hourCycle={12}
-                          data-invalid={fieldState.invalid}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              {/* Event Type Field */}
-              <div className="border-b border-r border-neutral-300 p-6">
-                <FormField
-                  control={form.control}
-                  name="type"
-                  render={({ field, fieldState }) => (
-                    <FormItem>
-                      <FormLabel className="font-semibold text-lg mb-2 block">
-                        Event Type
-                      </FormLabel>
-                      <FormControl>
-                        <Select
-                          value={field.value}
-                          onValueChange={field.onChange}
-                        >
-                          <SelectTrigger data-invalid={fieldState.invalid}>
-                            <SelectValue placeholder="Select event type" />
-                          </SelectTrigger>
-                          <SelectContent className="bg-neutral-100">
-                            <SelectItem value="general">
-                              <div className="flex items-center gap-2">
-                                <div className="size-3.5 rounded-full bg-gray-600" />
-                                General
-                              </div>
-                            </SelectItem>
-                            <SelectItem value="club">
-                              <div className="flex items-center gap-2">
-                                <div className="size-3.5 rounded-full bg-blue-600" />
-                                Club
-                              </div>
-                            </SelectItem>
-                            <SelectItem value="exam">
-                              <div className="flex items-center gap-2">
-                                <div className="size-3.5 rounded-full bg-red-600" />
-                                Exam
-                              </div>
-                            </SelectItem>
-                            <SelectItem value="deadline">
-                              <div className="flex items-center gap-2">
-                                <div className="size-3.5 rounded-full bg-orange-600" />
-                                Deadline
-                              </div>
-                            </SelectItem>
-                            <SelectItem value="rescheduled">
-                              <div className="flex items-center gap-2">
-                                <div className="size-3.5 rounded-full bg-purple-600" />
-                                Rescheduled
-                              </div>
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              {/* Description Field */}
-              <div className="border-b border-r border-neutral-300 p-6 col-span-3">
-                <FormField
-                  control={form.control}
-                  name="description"
-                  render={({ field, fieldState }) => (
-                    <FormItem>
-                      <FormLabel className="font-semibold text-lg mb-2 block">
-                        Description
-                      </FormLabel>
-                      <FormControl>
-                        <Textarea
-                          {...field}
-                          value={field.value}
-                          data-invalid={fieldState.invalid}
-                          className="text-sm"
-                          rows={4}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Title</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Event title" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Event description"
+                      className="resize-none"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="date"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>Date</FormLabel>
+                    <SingleDayPicker
+                      mode="single"
+                      selected={field.value}
+                      onSelect={(date) => {
+                        if (date) field.onChange(date);
+                      }}
+                    />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="startTime"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>Start Time</FormLabel>
+                    <TimeInput
+                      value={field.value as TimeValue} // Cast to TimeValue
+                      onChange={(timeValue) => {
+                        // Ensure timeValue is defined before accessing hour/minute
+                        if (timeValue) {
+                          field.onChange({
+                            hour: timeValue.hour,
+                            minute: timeValue.minute,
+                          });
+                        } else {
+                          // Handle case where timeValue is null/undefined (e.g., cleared)
+                          field.onChange({ hour: 0, minute: 0 });
+                        }
+                      }}
+                    />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
+            <FormField
+              control={form.control}
+              name="type"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Type</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select event type" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="general">General</SelectItem>
+                      <SelectItem value="club">Club</SelectItem>
+                      <SelectItem value="exam">Exam</SelectItem>
+                      <SelectItem value="deadline">Deadline</SelectItem>
+                      <SelectItem value="rescheduled">Rescheduled</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button type="button" variant="outline">
+                  Cancel
+                </Button>
+              </DialogClose>
+              <Button type="submit">Save Changes</Button>
+            </DialogFooter>
           </form>
         </Form>
-
-        <DialogFooter className="mt-6">
-          <DialogClose asChild>
-            <Button type="button" variant="outline">
-              Cancel
-            </Button>
-          </DialogClose>
-
-          <Button form="event-form" type="submit">
-            Save changes
-          </Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

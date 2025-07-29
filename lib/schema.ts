@@ -44,7 +44,7 @@ export const classes = pgTable("classes", {
 
 // Events
 export const events = pgTable("events", {
-  id: uuid("id").primaryKey().notNull(),
+  id: uuid("id").defaultRandom().primaryKey().notNull(),
   title: text("title").notNull(),
   description: text("description"),
   date: timestamp("date", { mode: "string" }).notNull(),
