@@ -87,159 +87,188 @@ export function EditEventDialog({ children, event }: IProps) {
     <Dialog open={isOpen} onOpenChange={onToggle}>
       <DialogTrigger asChild>{children}</DialogTrigger>
 
-      <DialogContent>
+      <DialogContent className="max-w-4xl">
         <DialogHeader>
-          <DialogTitle>Edit Event</DialogTitle>
-          <DialogDescription>
-            This is just and example of how to use the form. In a real
-            application, you would call the API to update the event
-          </DialogDescription>
+          <DialogTitle className="text-xl font-semibold">
+            Edit Event
+          </DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
           <form
             id="event-form"
             onSubmit={form.handleSubmit(onSubmit)}
-            className="grid gap-4 py-4"
+            className="mt-4"
           >
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field, fieldState }) => (
-                <FormItem>
-                  <FormLabel htmlFor="title">Title</FormLabel>
+            {/* Content Grid */}
+            <div className="grid grid-cols-3 border-t border-l border-neutral-300 w-full">
+              {/* Title Field */}
+              <div className="border-b border-r border-neutral-300 p-6 col-span-3">
+                <FormField
+                  control={form.control}
+                  name="title"
+                  render={({ field, fieldState }) => (
+                    <FormItem>
+                      <FormLabel
+                        htmlFor="title"
+                        className="font-semibold text-lg mb-2 block"
+                      >
+                        Event Title
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          id="title"
+                          placeholder="Enter a title"
+                          data-invalid={fieldState.invalid}
+                          className="text-sm"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
-                  <FormControl>
-                    <Input
-                      id="title"
-                      placeholder="Enter a title"
-                      data-invalid={fieldState.invalid}
-                      {...field}
-                    />
-                  </FormControl>
+              {/* Date Field */}
+              <div className="border-b border-r border-neutral-300 p-6">
+                <FormField
+                  control={form.control}
+                  name="date"
+                  render={({ field, fieldState }) => (
+                    <FormItem>
+                      <FormLabel
+                        htmlFor="startDate"
+                        className="font-semibold text-lg mb-2 block"
+                      >
+                        Date
+                      </FormLabel>
+                      <FormControl>
+                        <SingleDayPicker
+                          id="startDate"
+                          value={field.value}
+                          onSelect={(date) => field.onChange(date as Date)}
+                          placeholder="Select a date"
+                          data-invalid={fieldState.invalid}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <div className="flex items-start gap-2">
-              <FormField
-                control={form.control}
-                name="date"
-                render={({ field, fieldState }) => (
-                  <FormItem className="flex-1">
-                    <FormLabel htmlFor="startDate">Start Date</FormLabel>
+              {/* Time Field */}
+              <div className="border-b border-r border-neutral-300 p-6">
+                <FormField
+                  control={form.control}
+                  name="startTime"
+                  render={({ field, fieldState }) => (
+                    <FormItem>
+                      <FormLabel className="font-semibold text-lg mb-2 block">
+                        Start Time
+                      </FormLabel>
+                      <FormControl>
+                        <TimeInput
+                          value={field.value as TimeValue}
+                          onChange={field.onChange}
+                          hourCycle={12}
+                          data-invalid={fieldState.invalid}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
-                    <FormControl>
-                      <SingleDayPicker
-                        id="startDate"
-                        value={field.value}
-                        onSelect={(date) => field.onChange(date as Date)}
-                        placeholder="Select a date"
-                        data-invalid={fieldState.invalid}
-                      />
-                    </FormControl>
+              {/* Event Type Field */}
+              <div className="border-b border-r border-neutral-300 p-6">
+                <FormField
+                  control={form.control}
+                  name="type"
+                  render={({ field, fieldState }) => (
+                    <FormItem>
+                      <FormLabel className="font-semibold text-lg mb-2 block">
+                        Event Type
+                      </FormLabel>
+                      <FormControl>
+                        <Select
+                          value={field.value}
+                          onValueChange={field.onChange}
+                        >
+                          <SelectTrigger data-invalid={fieldState.invalid}>
+                            <SelectValue placeholder="Select event type" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-neutral-100">
+                            <SelectItem value="general">
+                              <div className="flex items-center gap-2">
+                                <div className="size-3.5 rounded-full bg-gray-600" />
+                                General
+                              </div>
+                            </SelectItem>
+                            <SelectItem value="club">
+                              <div className="flex items-center gap-2">
+                                <div className="size-3.5 rounded-full bg-blue-600" />
+                                Club
+                              </div>
+                            </SelectItem>
+                            <SelectItem value="exam">
+                              <div className="flex items-center gap-2">
+                                <div className="size-3.5 rounded-full bg-red-600" />
+                                Exam
+                              </div>
+                            </SelectItem>
+                            <SelectItem value="deadline">
+                              <div className="flex items-center gap-2">
+                                <div className="size-3.5 rounded-full bg-orange-600" />
+                                Deadline
+                              </div>
+                            </SelectItem>
+                            <SelectItem value="rescheduled">
+                              <div className="flex items-center gap-2">
+                                <div className="size-3.5 rounded-full bg-purple-600" />
+                                Rescheduled
+                              </div>
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="startTime"
-                render={({ field, fieldState }) => (
-                  <FormItem className="flex-1">
-                    <FormLabel>Start Time</FormLabel>
-
-                    <FormControl>
-                      <TimeInput
-                        value={field.value as TimeValue}
-                        onChange={field.onChange}
-                        hourCycle={12}
-                        data-invalid={fieldState.invalid}
-                      />
-                    </FormControl>
-
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {/* Description Field */}
+              <div className="border-b border-r border-neutral-300 p-6 col-span-3">
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field, fieldState }) => (
+                    <FormItem>
+                      <FormLabel className="font-semibold text-lg mb-2 block">
+                        Description
+                      </FormLabel>
+                      <FormControl>
+                        <Textarea
+                          {...field}
+                          value={field.value}
+                          data-invalid={fieldState.invalid}
+                          className="text-sm"
+                          rows={4}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
             </div>
-            // In both add-event-dialog.tsx and edit-event-dialog.tsx // Replace
-            the color select with type select:
-            <FormField
-              control={form.control}
-              name="type"
-              render={({ field, fieldState }) => (
-                <FormItem>
-                  <FormLabel>Event Type</FormLabel>
-                  <FormControl>
-                    <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger data-invalid={fieldState.invalid}>
-                        <SelectValue placeholder="Select event type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="general">
-                          <div className="flex items-center gap-2">
-                            <div className="size-3.5 rounded-full bg-gray-600" />
-                            General
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="club">
-                          <div className="flex items-center gap-2">
-                            <div className="size-3.5 rounded-full bg-blue-600" />
-                            Club
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="exam">
-                          <div className="flex items-center gap-2">
-                            <div className="size-3.5 rounded-full bg-red-600" />
-                            Exam
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="deadline">
-                          <div className="flex items-center gap-2">
-                            <div className="size-3.5 rounded-full bg-orange-600" />
-                            Deadline
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="rescheduled">
-                          <div className="flex items-center gap-2">
-                            <div className="size-3.5 rounded-full bg-purple-600" />
-                            Rescheduled
-                          </div>
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field, fieldState }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-
-                  <FormControl>
-                    <Textarea
-                      {...field}
-                      value={field.value}
-                      data-invalid={fieldState.invalid}
-                    />
-                  </FormControl>
-
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
           </form>
         </Form>
 
-        <DialogFooter>
+        <DialogFooter className="mt-6">
           <DialogClose asChild>
             <Button type="button" variant="outline">
               Cancel

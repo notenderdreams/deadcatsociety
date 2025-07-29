@@ -41,11 +41,11 @@ export function ClientContainer({ view }: IProps) {
       <div className="">
         <DndProviderWrapper>
           <div className="flex gap-16">
-            <div className="border">
+            <div className="border ">
               <CalendarMonthView events={filteredEvents} />
             </div>
             {showAgenda && (
-              <div className="border">
+              <div className="border w-2/3">
                 <CalendarAgendaView events={filteredEvents} />
               </div>
             )}
