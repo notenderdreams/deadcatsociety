@@ -1,4 +1,3 @@
-// notes/[semester]/[course]/page.tsx
 "use client";
 
 import { useMemo } from "react";
@@ -15,26 +14,24 @@ export default function App() {
   const semesterParam = params.semester as string;
   const courseParam = params.course as string;
 
-  const { getSemesterById, getCourseById } = useDatabaseStore();
+  const { isInitialized, getSemesterById, getCourseById } = useDatabaseStore();
 
   const semesterData = useMemo(() => {
+    if (!isInitialized) return undefined;
+
     const id = parseInt(semesterParam, 10);
     if (!isNaN(id)) {
       return getSemesterById(id);
     }
     return undefined;
-  }, [semesterParam, getSemesterById]);
+  }, [isInitialized, semesterParam, getSemesterById]);
 
   const courseData = useMemo(() => {
-    if (!semesterData || !courseParam) return undefined;
+    if (!isInitialized || !semesterData || !courseParam) return undefined;
 
     const foundCourse = semesterData.courses?.find((c) => c.id === courseParam);
-
-    if (foundCourse) {
-      return foundCourse;
-    }
-    return getCourseById(courseParam);
-  }, [semesterData, courseParam, getCourseById]);
+    return foundCourse || getCourseById(courseParam);
+  }, [isInitialized, semesterData, courseParam, getCourseById]);
 
   const classBlocks: ClassBlock[] = useMemo(() => {
     if (!courseData) return [];
@@ -51,17 +48,22 @@ export default function App() {
   }, [courseData]);
 
   const handleClassClick = (classId: string) => {
-    if (!semesterParam || !courseParam) {
-      console.error("Semester or Course parameter is missing for navigation");
-      return;
-    }
+    if (!semesterParam || !courseParam) return;
     router.push(`/notes/${semesterParam}/${courseParam}/${classId}`);
   };
 
+  if (!isInitialized) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-gray-500">
+        Loading course data...
+      </div>
+    );
+  }
+
   if (!courseData) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        Course not found. (Semester ID: {semesterParam}, Course ID/Param:{" "}
+      <div className="min-h-screen flex items-center justify-center text-red-500">
+        Course not found. (Semester ID: {semesterParam}, Course ID:{" "}
         {courseParam})
       </div>
     );

@@ -11,9 +11,12 @@ export default function SemesterGrid() {
   const semesterParam = params.semester as string;
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const { getSemesterById, getActiveSemester } = useDatabaseStore();
+  const { isInitialized, getSemesterById, getActiveSemester } =
+    useDatabaseStore();
 
   const semesterData = useMemo(() => {
+    if (!isInitialized) return undefined;
+
     if (semesterParam) {
       const id = parseInt(semesterParam, 10);
       if (!isNaN(id)) {
@@ -29,7 +32,7 @@ export default function SemesterGrid() {
       }
     }
     return getActiveSemester();
-  }, [semesterParam, getSemesterById, getActiveSemester]);
+  }, [isInitialized, semesterParam, getSemesterById, getActiveSemester]);
 
   const courses = useMemo(() => {
     return (
@@ -51,14 +54,12 @@ export default function SemesterGrid() {
       const courseBlocks =
         containerRef.current.querySelectorAll(".course-block");
 
-      // Set initial state for all blocks
       courseBlocks.forEach((block) => {
         (block as HTMLElement).style.opacity = "0";
         (block as HTMLElement).style.filter = "blur(4px)";
         (block as HTMLElement).style.transform = "translateY(20px)";
       });
 
-      // Trigger animation for all blocks simultaneously
       setTimeout(() => {
         courseBlocks.forEach((block) => {
           (block as HTMLElement).style.transition =
@@ -67,7 +68,7 @@ export default function SemesterGrid() {
           (block as HTMLElement).style.filter = "blur(0)";
           (block as HTMLElement).style.transform = "translateY(0)";
         });
-      }, 10); // Small timeout to ensure initial styles are applied
+      }, 10);
     }
   }, [courses]);
 
@@ -80,9 +81,17 @@ export default function SemesterGrid() {
     router.push(`/notes/${semesterData.id}/${courseId}`);
   };
 
+  if (!isInitialized) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-gray-500">
+        Loading semester data...
+      </div>
+    );
+  }
+
   if (!semesterData) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center text-red-500">
         Semester not found.
       </div>
     );

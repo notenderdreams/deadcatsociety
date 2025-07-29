@@ -29,12 +29,12 @@ export default function ClassDetailPage() {
   const params = useParams();
   const classParam = params.class as string;
 
-  const { getClassById } = useDatabaseStore();
+  const { getClassById, isInitialized } = useDatabaseStore();
 
-  const classData: DatabaseClass  = useMemo(() => {
-    if (!classParam) return null;
+  const classData: DatabaseClass | null = useMemo(() => {
+    if (!classParam || !isInitialized) return null;
     return getClassById(classParam);
-  }, [classParam, getClassById]);
+  }, [classParam, isInitialized, getClassById]);
 
   const pageData: ClassDetailData | null = useMemo(() => {
     if (!classData) return null;
@@ -80,9 +80,17 @@ export default function ClassDetailPage() {
     };
   }, [classData]);
 
+  if (!isInitialized) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-gray-500">
+        Loading class data...
+      </div>
+    );
+  }
+
   if (!pageData) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center text-red-500">
         Class data not found.
       </div>
     );
