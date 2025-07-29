@@ -1,12 +1,18 @@
-import { CalendarProvider } from "@/modules/calendar//contexts/calendar-context";
-import { getEvents } from "@/modules/calendar/requests";
+"use client"
+import { CalendarProvider } from "@/modules/calendar/contexts/calendar-context";
+import { useInitializeEvents } from "@/hooks/useInitializeEvents";
+import { useEffect } from "react";
+import { useDatabaseStore } from "@/lib/store/useDatabaseStore";
 
-export default async function Layout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const [events] = await Promise.all([getEvents()]);
+export default function Layout({ children }: { children: React.ReactNode }) {
+  const initializeEvents = useInitializeEvents();
+  const { events, isLoading } = useDatabaseStore();
+
+  useEffect(() => {
+    if (events.length === 0 && !isLoading) {
+      initializeEvents();
+    }
+  }, [events.length, isLoading, initializeEvents]);
 
   return (
     <CalendarProvider events={events}>

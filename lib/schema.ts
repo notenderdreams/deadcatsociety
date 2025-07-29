@@ -39,3 +39,16 @@ export const classes = pgTable("classes", {
   contributors: text("contributors").array().notNull(),
   updated_at: timestamp("updated_at", { mode: "string" }).notNull(),
 });
+
+
+
+// Events
+export const events = pgTable("events", {
+  id: uuid("id").primaryKey().notNull(),
+  title: text("title").notNull(),
+  description: text("description"),
+  date: timestamp("date", { mode: "string" }).notNull(),
+  type: text("type").$type<"general" | "club" | "exam" | "deadline" | "rescheduled">().notNull(),
+  created_at: timestamp("created_at", { mode: "string" }).notNull().defaultNow(),
+  updated_at: timestamp("updated_at", { mode: "string" }).notNull().defaultNow(),
+});

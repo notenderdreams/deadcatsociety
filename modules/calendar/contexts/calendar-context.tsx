@@ -5,14 +5,15 @@ import { createContext, useContext, useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import type { IEvent } from "@/modules/calendar/interfaces";
 import type { TBadgeVariant } from "@/modules/calendar/types";
+import { DatabaseEvent } from "@/types/models";
 
 interface ICalendarContext {
   selectedDate: Date;
   setSelectedDate: (date: Date | undefined) => void;
   badgeVariant: TBadgeVariant;
   setBadgeVariant: (variant: TBadgeVariant) => void;
-  events: IEvent[];
-  setLocalEvents: Dispatch<SetStateAction<IEvent[]>>;
+  events: DatabaseEvent[];
+  setLocalEvents: Dispatch<SetStateAction<DatabaseEvent[]>>;
 }
 
 const CalendarContext = createContext({} as ICalendarContext);
@@ -22,7 +23,7 @@ export function CalendarProvider({
   events,
 }: {
   children: React.ReactNode;
-  events: IEvent[];
+  events: DatabaseEvent[];
 }) {
   const [badgeVariant, setBadgeVariant] = useState<TBadgeVariant>("mixed");
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -31,7 +32,7 @@ export function CalendarProvider({
   // It's used here just to simulate the update of the events.
   // In a real scenario, the events would be updated in the backend
   // and the request that fetches the events should be refetched
-  const [localEvents, setLocalEvents] = useState<IEvent[]>(events);
+  const [localEvents, setLocalEvents] = useState<DatabaseEvent[]>(events);
 
   const handleSelectDate = (date: Date | undefined) => {
     if (!date) return;

@@ -29,3 +29,13 @@ export interface DatabaseClass {
   export interface DatabaseStructure {
     semesters: DatabaseSemester[];
   }
+
+export interface DatabaseEvent {
+  id: string;
+  title: string;
+  description: string;
+  date: string;
+  type: "general" | "club" | "exam" | "deadline" | "rescheduled";
+  created_at: string;
+  updated_at: string;
+}
