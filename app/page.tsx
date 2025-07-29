@@ -13,7 +13,7 @@ export default function Home() {
           >
             .deadcatsociety
           </div>
-          <div className="mt-[-16px]">
+          <div className="mt-[-14px]">
             <Image
               unoptimized={true}
               src="/sleeping_cat.gif"
@@ -24,9 +24,9 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="font-sans font-medium  text-[#3d3d3d] mt-2">
-          <TextEffect preset="fade-in-blur" speedReveal={1} speedSegment={0.5}>
-            Study Logs for the Terminally Curious
+        <div className="font-sans font-medium text-center  text-[#3d3d3d] mt-2">
+          <TextEffect preset="fade-in-blur" speedReveal={2} speedSegment={1}>
+            The  platform  nobody asked for but we all needed 
           </TextEffect>
         </div>
       </div>
