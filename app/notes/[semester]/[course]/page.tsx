@@ -1,24 +1,33 @@
 "use client";
-
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { Button } from "@heroui/react";
 import { PlusIcon } from "lucide-react";
 import { useDatabaseStore } from "@/lib/store/useDatabaseStore";
 import { ClassBlockItem, type ClassBlock } from "@/components/ClassBlockItem";
+import ClassModal from "@/components/ClassModal";
+
+interface EditFormData {
+  title: string;
+  description: string;
+  topics: string[];
+  notes: string;
+  references: string[];
+  contributors: string[];
+}
 
 export default function App() {
   const router = useRouter();
   const params = useParams();
   const semesterParam = params.semester as string;
   const courseParam = params.course as string;
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   const { isInitialized, getSemesterById, getCourseById } = useDatabaseStore();
 
   const semesterData = useMemo(() => {
     if (!isInitialized) return undefined;
-
     const id = parseInt(semesterParam, 10);
     if (!isNaN(id)) {
       return getSemesterById(id);
@@ -28,28 +37,49 @@ export default function App() {
 
   const courseData = useMemo(() => {
     if (!isInitialized || !semesterData || !courseParam) return undefined;
-
     const foundCourse = semesterData.courses?.find((c) => c.id === courseParam);
     return foundCourse || getCourseById(courseParam);
   }, [isInitialized, semesterData, courseParam, getCourseById]);
 
   const classBlocks: ClassBlock[] = useMemo(() => {
     if (!courseData) return [];
-    return courseData.classes?.map((cls) => ({
-      id: cls.id,
-      className: cls.title,
-      date: new Date(cls.updated_at).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      }),
-      topics: cls.topics || [],
-    }));
+    return (
+      courseData.classes?.map((cls) => ({
+        id: cls.id,
+        className: cls.title,
+        date: new Date(cls.updated_at).toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        }),
+        topics: cls.topics || [],
+      })) || []
+    );
   }, [courseData]);
 
   const handleClassClick = (classId: string) => {
     if (!semesterParam || !courseParam) return;
     router.push(`/notes/${semesterParam}/${courseParam}/${classId}`);
+  };
+
+  const handleAddClass = () => {
+    setIsAddModalOpen(true);
+  };
+
+  const handleSaveNewClass = (data: EditFormData) => {
+    // TODO: Implement database create functionality
+    console.log("Create new class:", {
+      courseId: courseParam,
+      semesterId: semesterParam,
+      title: data.title,
+      description: data.description,
+      topics: data.topics,
+      notes: data.notes ? [data.notes] : [],
+      references: data.references,
+      contributors: data.contributors,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    });
   };
 
   if (!isInitialized) {
@@ -73,7 +103,7 @@ export default function App() {
     <div className="min-h-screen bg-white text-black">
       <div className="px-96 py-16 flex justify-between">
         <h1 className="text-4xl font-serif">{courseData.name}</h1>
-        <Button className="bg-black text-white ">
+        <Button className="bg-black text-white" onClick={handleAddClass}>
           <PlusIcon size={16} />
           New Class
         </Button>
@@ -107,6 +137,14 @@ export default function App() {
         )}
         <div className="h-16" />
       </motion.div>
+
+      {/* Add Class Modal */}
+      <ClassModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onSave={handleSaveNewClass}
+        isEdit={false}
+      />
     </div>
   );
 }

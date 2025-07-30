@@ -1,16 +1,18 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { Download, Pencil } from "lucide-react";
 import { Button } from "@heroui/react";
 import ClassNavPanel from "@/components/ClassNavPanel";
+import ClassModal from "@/components/ClassModal";
 import { useDatabaseStore } from "@/lib/store/useDatabaseStore";
 import {
   DatabaseClass,
   DatabaseCourse,
   DatabaseSemester,
 } from "@/types/models";
+import { AnimatePresence } from "framer-motion";
 
 interface ClassDetailData {
   semesterName: string;
@@ -25,9 +27,19 @@ interface ClassDetailData {
   lastUpdated: string;
 }
 
+interface EditFormData {
+  title: string;
+  description: string;
+  topics: string[];
+  notes: string;
+  references: string[];
+  contributors: string[];
+}
+
 export default function ClassDetailPage() {
   const params = useParams();
   const classParam = params.class as string;
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const { getClassById, isInitialized } = useDatabaseStore();
 
@@ -80,6 +92,35 @@ export default function ClassDetailPage() {
     };
   }, [classData]);
 
+  const handleEditClick = () => {
+    setIsEditModalOpen(true);
+  };
+
+  const handleSaveEdit = (data: EditFormData) => {
+    // TODO: Implement database update functionality
+    console.log("Save changes:", {
+      title: data.title,
+      description: data.description,
+      topics: data.topics,
+      notes: data.notes ? [data.notes] : [],
+      references: data.references,
+      contributors: data.contributors,
+    });
+  };
+
+  const getInitialFormData = (): EditFormData | undefined => {
+    if (!classData) return undefined;
+
+    return {
+      title: classData.title,
+      description: classData.description,
+      topics: classData.topics || [],
+      notes: classData.notes?.[0] || "",
+      references: classData.references || [],
+      contributors: classData.contributors || [],
+    };
+  };
+
   if (!isInitialized) {
     return (
       <div className="min-h-screen flex items-center justify-center text-gray-500">
@@ -113,7 +154,10 @@ export default function ClassDetailPage() {
               {pageData.classTitle}
             </span>
           </nav>
-          <Button className="inline-flex items-center gap-1 text-sm px-3 py-1 border border-neutral-300 rounded hover:bg-neutral-100 transition">
+          <Button
+            className="inline-flex items-center gap-1 text-sm px-3 py-1 border border-neutral-300 rounded hover:bg-neutral-100 transition"
+            onClick={handleEditClick}
+          >
             <Pencil size={14} />
             Edit
           </Button>
@@ -211,6 +255,17 @@ export default function ClassDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Edit Modal */}
+      <AnimatePresence>
+        <ClassModal
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          onSave={handleSaveEdit}
+          isEdit={true}
+          initialData={getInitialFormData()}
+        />
+      </AnimatePresence>
     </div>
   );
 }
