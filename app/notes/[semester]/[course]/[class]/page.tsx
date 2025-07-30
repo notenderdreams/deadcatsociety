@@ -45,7 +45,8 @@ export default function ClassDetailPage() {
 
   const classData: DatabaseClass | null = useMemo(() => {
     if (!classParam || !isInitialized) return null;
-    return getClassById(classParam);
+    const data = getClassById(classParam);
+    return data ? data : null;
   }, [classParam, isInitialized, getClassById]);
 
   const pageData: ClassDetailData | null = useMemo(() => {
