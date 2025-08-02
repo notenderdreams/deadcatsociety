@@ -1,9 +1,9 @@
 import { TodayButton } from "@/modules/calendar/components/header/today-button";
 import { DateNavigator } from "@/modules/calendar/components/header/date-navigator";
 
-import type { IEvent } from "@/modules/calendar/interfaces";
 import type { TCalendarView } from "@/modules/calendar/types";
 import { formatDate } from "date-fns";
+import { IEvent } from "@/types/models";
 
 interface IProps {
   view: TCalendarView;

@@ -27,7 +27,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { useState } from "react";
 import { useDeleteEvent } from "@/modules/calendar/hooks/use-delete-event"; // Import the new hook
-import type { IEvent } from "@/modules/calendar/interfaces"; // Adjust import path if needed
+import type { IEvent } from "@/types/models"; // Adjust import path if needed
 
 interface IProps {
   event: IEvent; // Or DatabaseEvent if that's the consistent type
@@ -179,16 +179,13 @@ export function EventDetailsDialog({ event, children, onDelete }: IProps) {
       </Dialog>
 
       {/* Delete Confirmation Dialog */}
-      <Dialog
-        open={isDeleteDialogOpen}
-        onOpenChange={setIsDeleteDialogOpen}
-      >
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Confirm Deletion</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete the event &quot;{event.title}&quot;?
-              This action cannot be undone.
+              Are you sure you want to delete the event &quot;{event.title}
+              &quot;? This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

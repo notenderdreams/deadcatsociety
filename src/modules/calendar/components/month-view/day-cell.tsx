@@ -9,8 +9,9 @@ import { AddEventDialog } from "@/modules/calendar/components/dialogs/add-event-
 import { cn } from "@/lib/utils";
 import { getMonthCellEvents } from "@/modules/calendar/helpers";
 
-import type { ICalendarCell, IEvent } from "@/modules/calendar/interfaces";
 import { Plus } from "lucide-react";
+import { ICalendarCell } from "../../interfaces";
+import { IEvent } from "@/types/models";
 
 interface IProps {
   cell: ICalendarCell;

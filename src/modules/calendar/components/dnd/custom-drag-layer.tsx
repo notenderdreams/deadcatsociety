@@ -1,8 +1,8 @@
 "use client";
 
+import { IEvent } from "@/types/models";
 import { useDragLayer } from "react-dnd";
 
-import type { IEvent } from "@/modules/calendar/interfaces";
 
 interface IDragItem {
   event: IEvent;

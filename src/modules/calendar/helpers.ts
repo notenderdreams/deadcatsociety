@@ -12,8 +12,9 @@ import {
   eachDayOfInterval,
 } from "date-fns";
 
-import type { ICalendarCell, IEvent } from "@/modules/calendar/interfaces";
+import type { ICalendarCell } from "@/modules/calendar/interfaces";
 import type { TCalendarView } from "@/modules/calendar/types";
+import { IEvent } from "@/types/models";
 
 export function rangeText(view: TCalendarView, date: Date) {
   const formatString = "MMM d, yyyy";

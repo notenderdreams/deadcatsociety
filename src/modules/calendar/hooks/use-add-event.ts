@@ -3,13 +3,13 @@
 
 import { useDatabaseStore } from "@/lib/store/useDatabaseStore";
 import { toast } from "sonner";
-import { DatabaseEvent } from "@/types/models"; // Adjust import path if needed
+import { IEvent } from "@/types/models"; // Adjust import path if needed
 
 export function useAddEvent() {
   const setEvents = useDatabaseStore((state) => state.setEvents);
 
   const addEvent = async (
-    newEventData: Omit<DatabaseEvent, "id" | "created_at" | "updated_at">
+    newEventData: Omit<IEvent, "id" | "created_at" | "updated_at">
   ) => {
     try {
       const response = await fetch("/api/events", {
@@ -28,7 +28,7 @@ export function useAddEvent() {
         );
       }
 
-      const createdEvent: DatabaseEvent = await response.json();
+      const createdEvent: IEvent = await response.json();
 
       // Optimistic Update: Add the new event to the Zustand store
       setEvents((prevEvents) => [...prevEvents, createdEvent]);

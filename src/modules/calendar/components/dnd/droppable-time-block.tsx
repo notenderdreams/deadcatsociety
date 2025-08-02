@@ -8,7 +8,7 @@ import { useUpdateEvent } from "@/modules/calendar/hooks/use-update-event";
 import { cn } from "@/lib/utils";
 import { ItemTypes } from "@/modules/calendar/components/dnd/draggable-event";
 
-import type { IEvent } from "@/modules/calendar/interfaces";
+import type { IEvent } from "@/types/models";
 
 interface DroppableTimeBlockProps {
   date: Date;

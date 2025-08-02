@@ -40,7 +40,7 @@ import { useUpdateEvent } from "@/modules/calendar/hooks/use-update-event"; // E
 import { DatabaseEvent } from "@/types/models"; // Adjust import path if needed
 import type { TimeValue } from "react-aria-components";
 import type { TEventFormData } from "@/modules/calendar/schemas";
-import type { IEvent } from "@/modules/calendar/interfaces"; // Adjust import path if needed
+import type { IEvent } from "@/types/models"; // Adjust import path if needed
 
 interface IProps {
   children: React.ReactNode;

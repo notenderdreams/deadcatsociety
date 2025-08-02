@@ -10,9 +10,9 @@ import {
   rangeText,
 } from "@/modules/calendar/helpers";
 
-import type { IEvent } from "@/modules/calendar/interfaces";
 import type { TCalendarView } from "@/modules/calendar/types";
 import { cn } from "@/lib/utils";
+import { IEvent } from "@/types/models";
 
 interface IProps {
   view: TCalendarView;

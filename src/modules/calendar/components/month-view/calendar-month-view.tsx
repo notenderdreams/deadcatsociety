@@ -8,8 +8,8 @@ import {
   getCalendarCells,
   calculateMonthEventPositions,
 } from "@/modules/calendar/helpers";
+import { IEvent } from "@/types/models";
 
-import type { IEvent } from "@/modules/calendar/interfaces";
 
 interface IProps {
   events: IEvent[];

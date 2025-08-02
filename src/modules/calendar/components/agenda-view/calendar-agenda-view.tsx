@@ -7,7 +7,7 @@ import { useCalendar } from "@/modules/calendar/contexts/calendar-context";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { AgendaDayGroup } from "@/modules/calendar/components/agenda-view/agenda-day-group";
 
-import type { IEvent } from "@/modules/calendar/interfaces";
+import type { IEvent } from "@/types/models";
 
 interface IProps {
   events: IEvent[];

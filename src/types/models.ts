@@ -1,3 +1,5 @@
+import { TEventType } from "@/modules/calendar/types";
+
 export interface DatabaseClass {
     id: string;
     course_id: string;
@@ -30,12 +32,12 @@ export interface DatabaseClass {
     semesters: DatabaseSemester[];
   }
 
-export interface DatabaseEvent {
+export interface IEvent {
   id: string;
   title: string;
   description: string;
   date: string;
-  type: "general" | "club" | "exam" | "deadline" | "rescheduled";
+  type: TEventType
   created_at: string;
   updated_at: string;
 }

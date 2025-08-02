@@ -2,7 +2,7 @@ import { format } from "date-fns";
 
 import { AgendaEventCard } from "@/modules/calendar/components/agenda-view/agenda-event-card";
 
-import type { IEvent } from "@/modules/calendar/interfaces";
+import type { IEvent } from "@/types/models";
 
 interface IProps {
   date: Date;
