@@ -41,14 +41,15 @@ export default function ClassDetailPage() {
   const router = useRouter();
   const classParam = params.class as string;
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { getClassById, isInitialized } = useDatabaseStore();
+  const { getClassById, isInitialized, updateClass, data } = useDatabaseStore();
 
   const classData: DatabaseClass | null = useMemo(() => {
     if (!classParam || !isInitialized) return null;
     const data = getClassById(classParam);
     return data ? data : null;
-  }, [classParam, isInitialized, getClassById]);
+  }, [classParam, isInitialized, getClassById, data]); // Added data dependency
 
   const pageData: ClassDetailData | null = useMemo(() => {
     if (!classData) return null;
@@ -98,16 +99,52 @@ export default function ClassDetailPage() {
     setIsEditModalOpen(true);
   };
 
-  const handleSaveEdit = (data: EditFormData) => {
-    // TODO: Implement database update functionality
-    console.log("Save changes:", {
-      title: data.title,
-      description: data.description,
-      topics: data.topics,
-      notes: data.notes ? [data.notes] : [],
-      references: data.references,
-      contributors: data.contributors,
-    });
+  const handleSaveEdit = async (formData: EditFormData) => {
+    if (!classData || isSubmitting) return;
+
+    setIsSubmitting(true);
+
+    try {
+      const updatedClassPayload = {
+        title: formData.title,
+        description: formData.description,
+        topics: formData.topics,
+        notes: formData.notes ? [formData.notes] : [],
+        references: formData.references,
+        contributors: formData.contributors,
+        updated_at: new Date().toISOString(),
+      };
+
+      const response = await fetch(`/api/class/${classData.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedClassPayload),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to update class: ${response.status}`);
+      }
+
+      const result = await response.json();
+
+      if (result.success && result.updated) {
+        // Update the local state using the store method
+        updateClass(classData.id, result.updated);
+        setIsEditModalOpen(false);
+
+        // Show success message
+        console.log("Class updated successfully!");
+      } else {
+        throw new Error("Failed to get updated class data");
+      }
+    } catch (error) {
+      console.error("Failed to update class:", error);
+      alert("Failed to update class. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const getInitialFormData = (): EditFormData | undefined => {
@@ -141,11 +178,6 @@ export default function ClassDetailPage() {
 
   return (
     <div className="flex min-h-screen justify-center">
-      {/* Sidebar */}
-      {/* <div className="w-1/5 ml-24"> */}
-      {/* <ClassNavPanel /> */}
-      {/* </div> */}
-
       {/* Main Content */}
       <div
         className={`bg-neutral-100 px-4 py-10 flex flex-col items-center transition-all duration-300 ${
@@ -177,6 +209,7 @@ export default function ClassDetailPage() {
           <Button
             className="inline-flex items-center gap-1 text-sm px-3 py-1 border border-neutral-300 rounded hover:bg-neutral-100 transition"
             onClick={handleEditClick}
+            disabled={isSubmitting}
           >
             <Pencil size={14} />
             Edit
@@ -341,10 +374,11 @@ export default function ClassDetailPage() {
       <AnimatePresence>
         <ClassModal
           isOpen={isEditModalOpen}
-          onClose={() => setIsEditModalOpen(false)}
+          onClose={() => !isSubmitting && setIsEditModalOpen(false)}
           onSave={handleSaveEdit}
           isEdit={true}
           initialData={getInitialFormData()}
+          disabled={isSubmitting}
         />
       </AnimatePresence>
     </div>
