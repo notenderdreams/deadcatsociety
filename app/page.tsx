@@ -26,7 +26,7 @@ export default function Home() {
 
         <div className="font-sans font-medium text-center  text-[#3d3d3d] mt-2">
           <TextEffect preset="fade-in-blur" speedReveal={2} speedSegment={1}>
-            The  platform  nobody asked for but we all needed 
+            The platform no one asked for but we all needed 
           </TextEffect>
         </div>
       </div>
