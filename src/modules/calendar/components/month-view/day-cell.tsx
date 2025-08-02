@@ -45,14 +45,12 @@ export function DayCell({ cell, events, eventPositions }: IProps) {
     <DroppableDayCell cell={cell}>
       <div
         className={cn(
-          "flex h-full flex-col gap-1 border-l border-t py-1.5 lg:py-2 relative",
+          "flex h-full min-h-[120px] lg:min-w-45 flex-col gap-1 border-l border-t py-1.5 lg:py-2 relative",
           isSunday && "border-l-0"
         )}
       >
-        {/* Background overlay for visual feedback only */}
         <div className="absolute inset-0 pointer-events-none" />
 
-        {/* Day number */}
         <AddEventDialog
           startDate={date}
           startTime={{ hour: 9, minute: 0 }}
@@ -61,7 +59,7 @@ export function DayCell({ cell, events, eventPositions }: IProps) {
         >
           <div
             className={cn(
-              "h-6 px-1 lg:px-2 relative z-10 flex items-center justify-between cursor-pointer  group transition-colors",
+              "h-6 px-1 lg:px-2 relative z-10 flex items-center justify-between cursor-pointer group transition-colors",
               "hover:bg-neutral-800",
               !currentMonth && "opacity-20"
             )}
@@ -81,17 +79,15 @@ export function DayCell({ cell, events, eventPositions }: IProps) {
               {day}
             </span>
 
-            {/* Plus icon - visible on hover */}
-            <div className=" text-white opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="text-white opacity-0 group-hover:opacity-100 transition-opacity">
               <Plus size={15} />
             </div>
           </div>
         </AddEventDialog>
 
-        {/* Events container */}
         <div
           className={cn(
-            "flex h-6 gap-1 px-2 lg:h-[94px] lg:flex-col lg:gap-2 lg:px-0 relative z-10",
+            "flex min-h-[94px] gap-1 px-2 lg:flex-col lg:gap-2 lg:px-0 relative z-10",
             !currentMonth && "opacity-50"
           )}
         >
@@ -118,7 +114,6 @@ export function DayCell({ cell, events, eventPositions }: IProps) {
           })}
         </div>
 
-        {/* More events indicator */}
         {cellEvents.length > MAX_VISIBLE_EVENTS && (
           <p
             className={cn(
@@ -130,7 +125,6 @@ export function DayCell({ cell, events, eventPositions }: IProps) {
               +{cellEvents.length - MAX_VISIBLE_EVENTS}
             </span>
             <span className="hidden sm:inline">
-              {" "}
               {cellEvents.length - MAX_VISIBLE_EVENTS} more...
             </span>
           </p>
