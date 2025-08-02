@@ -23,8 +23,15 @@ export default function App() {
   const semesterParam = params.semester as string;
   const courseParam = params.course as string;
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { isInitialized, getSemesterById, getCourseById } = useDatabaseStore();
+  const {
+    isInitialized,
+    getSemesterById,
+    getCourseById,
+    addClassToCourse,
+    data,
+  } = useDatabaseStore();
 
   const semesterData = useMemo(() => {
     if (!isInitialized) return undefined;
@@ -33,18 +40,19 @@ export default function App() {
       return getSemesterById(id);
     }
     return undefined;
-  }, [isInitialized, semesterParam, getSemesterById]);
+  }, [isInitialized, semesterParam, getSemesterById, data]); // Added data dependency
 
   const courseData = useMemo(() => {
     if (!isInitialized || !semesterData || !courseParam) return undefined;
     const foundCourse = semesterData.courses?.find((c) => c.id === courseParam);
     return foundCourse || getCourseById(courseParam);
-  }, [isInitialized, semesterData, courseParam, getCourseById]);
+  }, [isInitialized, semesterData, courseParam, getCourseById, data]); // Added data dependency
 
   const classBlocks: ClassBlock[] = useMemo(() => {
     if (!courseData) return [];
-    return (
-      courseData.classes?.map((cls) => ({
+    return [...(courseData.classes || [])] // create a shallow copy
+      .reverse() // reverse to show newest first
+      .map((cls) => ({
         id: cls.id,
         className: cls.title,
         date: new Date(cls.updated_at).toLocaleDateString("en-US", {
@@ -53,9 +61,8 @@ export default function App() {
           year: "numeric",
         }),
         topics: cls.topics || [],
-      })) || []
-    );
-  }, [courseData]);
+      }));
+  }, [courseData, data]);
 
   const handleClassClick = (classId: string) => {
     if (!semesterParam || !courseParam) return;
@@ -66,20 +73,54 @@ export default function App() {
     setIsAddModalOpen(true);
   };
 
-  const handleSaveNewClass = (data: EditFormData) => {
-    // TODO: Implement database create functionality
-    console.log("Create new class:", {
-      courseId: courseParam,
-      semesterId: semesterParam,
-      title: data.title,
-      description: data.description,
-      topics: data.topics,
-      notes: data.notes ? [data.notes] : [],
-      references: data.references,
-      contributors: data.contributors,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    });
+  const handleSaveNewClass = async (formData: EditFormData) => {
+    if (!courseParam || isSubmitting) return;
+
+    setIsSubmitting(true);
+
+    try {
+      const newClassPayload = {
+        course_id: courseParam,
+        title: formData.title,
+        description: formData.description,
+        topics: formData.topics,
+        notes: formData.notes ? [formData.notes] : [],
+        references: formData.references,
+        contributors: formData.contributors,
+        updated_at: new Date().toISOString(),
+      };
+
+      const response = await fetch("/api/class", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newClassPayload),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to create class: ${response.status}`);
+      }
+
+      const result = await response.json();
+
+      if (result.success && result.class) {
+        // Use the returned class data with actual ID from database
+        addClassToCourse(courseParam, result.class);
+        setIsAddModalOpen(false);
+
+        // Show success message
+        console.log("Class created successfully with ID:", result.class.id);
+      } else {
+        throw new Error("Failed to get created class data");
+      }
+    } catch (error) {
+      console.error("Failed to create class:", error);
+      // You might want to show an error toast here
+      alert("Failed to create class. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (!isInitialized) {
@@ -101,13 +142,17 @@ export default function App() {
 
   return (
     <div
-      className={`min-h-screen  text-black transition-all duration-300 ${
+      className={`min-h-screen text-black transition-all duration-300 ${
         isAddModalOpen ? "blur-sm" : ""
       }`}
     >
       <div className="px-96 py-16 flex justify-between">
         <h1 className="text-4xl font-serif">{courseData.name}</h1>
-        <Button className="bg-black text-white" onClick={handleAddClass}>
+        <Button
+          className="bg-black text-white"
+          onClick={handleAddClass}
+          disabled={isSubmitting}
+        >
           <PlusIcon size={16} />
           New Class
         </Button>
@@ -145,9 +190,10 @@ export default function App() {
       {/* Add Class Modal */}
       <ClassModal
         isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
+        onClose={() => !isSubmitting && setIsAddModalOpen(false)}
         onSave={handleSaveNewClass}
         isEdit={false}
+        // disabled={isSubmitting}
       />
     </div>
   );

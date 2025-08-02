@@ -6,10 +6,19 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    await db.insert(classes).values(body);
-    return NextResponse.json({ success: true });
+
+    // Insert the new class and return the created record
+    const [newClass] = await db.insert(classes).values(body).returning();
+
+    return NextResponse.json({
+      success: true,
+      class: newClass,
+    });
   } catch (error) {
     console.error("Insert error:", error);
-    return NextResponse.json({ error: "Failed to insert" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to insert class" },
+      { status: 500 }
+    );
   }
 }

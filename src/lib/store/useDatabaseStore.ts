@@ -20,6 +20,9 @@ interface DatabaseState {
   setError: (error: string | null) => void;
   setInitialized: (initialized: boolean) => void;
   setEventsInitialized: (initialized: boolean) => void;
+  addClassToCourse: (courseId: string, newClass: DatabaseClass) => void;
+  updateClass: (classId: string, updatedClass: Partial<DatabaseClass>) => void;
+  removeClass: (classId: string) => void;
   getActiveSemester: () => DatabaseSemester | undefined;
   getSemesterById: (id: number) => DatabaseSemester | undefined;
   getCourseById: (id: string) => DatabaseCourse | undefined;
@@ -36,6 +39,7 @@ export const useDatabaseStore = create<DatabaseState>()((set, get) => ({
   error: null,
   isInitialized: false,
   eventsInitialized: false,
+
   setData: (newData) => set({ data: newData }),
   setEvents: (events) => set({ events }),
   setLoading: (loading) => set({ isLoading: loading }),
@@ -43,6 +47,78 @@ export const useDatabaseStore = create<DatabaseState>()((set, get) => ({
   setInitialized: (initialized) => set({ isInitialized: initialized }),
   setEventsInitialized: (initialized) =>
     set({ eventsInitialized: initialized }),
+
+  addClassToCourse: (courseId, newClass) => {
+    const currentData = get().data;
+    const updatedData = { ...currentData };
+
+    // Find the course and add the class
+    for (const semester of updatedData.semesters) {
+      if (semester.courses) {
+        const course = semester.courses.find((c) => c.id === courseId);
+        if (course) {
+          if (!course.classes) {
+            course.classes = [];
+          }
+          course.classes.push(newClass);
+          course.updated_at = new Date().toISOString();
+          break;
+        }
+      }
+    }
+
+    set({ data: updatedData });
+  },
+
+  updateClass: (classId, updatedClass) => {
+    const currentData = get().data;
+    const updatedData = { ...currentData };
+
+    for (const semester of updatedData.semesters) {
+      if (semester.courses) {
+        for (const course of semester.courses) {
+          if (course.classes) {
+            const classIndex = course.classes.findIndex(
+              (c) => c.id === classId
+            );
+            if (classIndex !== -1) {
+              course.classes[classIndex] = {
+                ...course.classes[classIndex],
+                ...updatedClass,
+              };
+              course.updated_at = new Date().toISOString();
+              set({ data: updatedData });
+              return;
+            }
+          }
+        }
+      }
+    }
+  },
+
+  removeClass: (classId) => {
+    const currentData = get().data;
+    const updatedData = { ...currentData };
+
+    for (const semester of updatedData.semesters) {
+      if (semester.courses) {
+        for (const course of semester.courses) {
+          if (course.classes) {
+            const classIndex = course.classes.findIndex(
+              (c) => c.id === classId
+            );
+            if (classIndex !== -1) {
+              course.classes.splice(classIndex, 1);
+              course.updated_at = new Date().toISOString();
+              set({ data: updatedData });
+              return;
+            }
+          }
+        }
+      }
+    }
+  },
+
   getActiveSemester: () => get().data.semesters.find((s) => s.is_active),
   getSemesterById: (id) => get().data.semesters.find((s) => s.id === id),
   getCourseById: (id) => {
