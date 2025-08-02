@@ -7,7 +7,7 @@ import { resolve } from "path";
 dotenvConfig({ path: resolve(process.cwd(), ".env.local") });
 
 const config: Config = {
-  schema: "./lib/schema.ts",
+  schema: "./src/lib/schema.ts",
   out: "./drizzle",
   dialect: "postgresql",
   dbCredentials: {
