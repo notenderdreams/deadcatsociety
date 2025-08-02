@@ -1,8 +1,9 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useParams } from "next/navigation";
-import { Download, Pencil } from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
+import { Download, Pencil, ArrowLeft } from "lucide-react";
 import { Button } from "@heroui/react";
 import ClassNavPanel from "@/components/ClassNavPanel";
 import ClassModal from "@/components/ClassModal";
@@ -12,7 +13,6 @@ import {
   DatabaseCourse,
   DatabaseSemester,
 } from "@/types/models";
-import { AnimatePresence } from "framer-motion";
 
 interface ClassDetailData {
   semesterName: string;
@@ -38,6 +38,7 @@ interface EditFormData {
 
 export default function ClassDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const classParam = params.class as string;
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
@@ -139,22 +140,40 @@ export default function ClassDetailPage() {
   }
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen justify-center">
       {/* Sidebar */}
-      <div className="w-1/5 ml-24">
-        <ClassNavPanel />
-      </div>
+      {/* <div className="w-1/5 ml-24"> */}
+      {/* <ClassNavPanel /> */}
+      {/* </div> */}
 
       {/* Main Content */}
-      <div className="w-4/5 bg-neutral-100 px-4 py-10 flex flex-col items-center">
+      <div
+        className={`bg-neutral-100 px-4 py-10 flex flex-col items-center transition-all duration-300 ${
+          isEditModalOpen ? "blur-sm" : ""
+        }`}
+      >
         {/* Top Bar */}
-        <div className="flex justify-between items-center w-full max-w-5xl mb-6">
-          <nav className="text-sm text-neutral-500">
-            {pageData.semesterName} / {pageData.courseCode} /{" "}
-            <span className="text-black font-medium">
-              {pageData.classTitle}
-            </span>
-          </nav>
+        <motion.div
+          className="flex justify-between items-center w-full max-w-5xl mb-6"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <div className="flex items-center gap-4">
+            <Button
+              className="inline-flex items-center gap-1 text-sm px-3 py-1 border border-neutral-300 rounded hover:bg-neutral-100 transition"
+              onClick={() => router.back()}
+            >
+              <ArrowLeft size={14} />
+              Back
+            </Button>
+            <nav className="text-sm text-neutral-500">
+              {pageData.semesterName} / {pageData.courseCode} /{" "}
+              <span className="text-black font-medium">
+                {pageData.classTitle}
+              </span>
+            </nav>
+          </div>
           <Button
             className="inline-flex items-center gap-1 text-sm px-3 py-1 border border-neutral-300 rounded hover:bg-neutral-100 transition"
             onClick={handleEditClick}
@@ -162,29 +181,69 @@ export default function ClassDetailPage() {
             <Pencil size={14} />
             Edit
           </Button>
-        </div>
+        </motion.div>
 
         {/* Content Grid */}
-        <div className="grid grid-cols-3 border-t border-l border-neutral-300 max-w-5xl w-full">
+        <motion.div
+          className="grid grid-cols-3 border-t border-l border-neutral-300 max-w-5xl w-full"
+          initial="hidden"
+          animate="visible"
+          variants={{
+            hidden: {},
+            visible: {
+              transition: {
+                staggerChildren: 0.05,
+              },
+            },
+          }}
+        >
           {/* Title */}
-          <div className="border-b border-r border-neutral-300 p-6 h-48 flex items-center justify-center text-2xl font-bold col-span-3">
+          <motion.div
+            className="border-b border-r border-neutral-300 p-6 h-48 flex items-center justify-center text-2xl font-bold col-span-3"
+            variants={{
+              hidden: { opacity: 0, y: 20 },
+              visible: { opacity: 1, y: 0 },
+            }}
+            transition={{ duration: 0.3 }}
+          >
             {pageData.classTitle}
-          </div>
+          </motion.div>
 
           {/* Description */}
-          <div className="border-b border-r border-neutral-300 p-6 col-span-2">
+          <motion.div
+            className="border-b border-r border-neutral-300 p-6 col-span-2"
+            variants={{
+              hidden: { opacity: 0, y: 20 },
+              visible: { opacity: 1, y: 0 },
+            }}
+            transition={{ duration: 0.3 }}
+          >
             <h2 className="font-semibold text-lg mb-2">Description</h2>
             <p className="text-sm text-neutral-700">{pageData.description}</p>
-          </div>
+          </motion.div>
 
           {/* Last Updated */}
-          <div className="border-b border-r border-neutral-300 p-6">
+          <motion.div
+            className="border-b border-r border-neutral-300 p-6"
+            variants={{
+              hidden: { opacity: 0, y: 20 },
+              visible: { opacity: 1, y: 0 },
+            }}
+            transition={{ duration: 0.3 }}
+          >
             <h2 className="font-semibold text-lg mb-2">Last Updated</h2>
             <p className="text-sm text-neutral-500">{pageData.lastUpdated}</p>
-          </div>
+          </motion.div>
 
           {/* Topics */}
-          <div className="border-b border-r border-neutral-300 p-6 col-span-3">
+          <motion.div
+            className="border-b border-r border-neutral-300 p-6 col-span-3"
+            variants={{
+              hidden: { opacity: 0, y: 20 },
+              visible: { opacity: 1, y: 0 },
+            }}
+            transition={{ duration: 0.3 }}
+          >
             <h2 className="font-semibold text-lg mb-2">Topics Covered</h2>
             {pageData.topics.length > 0 ? (
               <ul className="list-disc list-inside text-sm text-neutral-700 space-y-1">
@@ -197,11 +256,18 @@ export default function ClassDetailPage() {
                 No topics listed.
               </p>
             )}
-          </div>
+          </motion.div>
 
           {/* Notes */}
           {pageData.notesFile && (
-            <div className="border-b border-r border-neutral-300 p-6 col-span-2">
+            <motion.div
+              className="border-b border-r border-neutral-300 p-6 col-span-2"
+              variants={{
+                hidden: { opacity: 0, y: 20 },
+                visible: { opacity: 1, y: 0 },
+              }}
+              transition={{ duration: 0.3 }}
+            >
               <h2 className="font-semibold text-lg mb-2">Notes</h2>
               <a
                 href={pageData.notesFile.url}
@@ -211,11 +277,18 @@ export default function ClassDetailPage() {
                 <Download size={16} />
                 {pageData.notesFile.name}
               </a>
-            </div>
+            </motion.div>
           )}
 
           {/* Contributors */}
-          <div className="border-b border-r border-neutral-300 p-6">
+          <motion.div
+            className="border-b border-r border-neutral-300 p-6"
+            variants={{
+              hidden: { opacity: 0, y: 20 },
+              visible: { opacity: 1, y: 0 },
+            }}
+            transition={{ duration: 0.3 }}
+          >
             <h2 className="font-semibold text-lg mb-2">Contributors</h2>
             <ul className="flex flex-wrap gap-2 text-sm text-neutral-700">
               {pageData.contributors.map((name, idx) => (
@@ -224,10 +297,17 @@ export default function ClassDetailPage() {
                 </li>
               ))}
             </ul>
-          </div>
+          </motion.div>
 
           {/* References */}
-          <div className="border-b border-r border-neutral-300 p-6 col-span-3">
+          <motion.div
+            className="border-b border-r border-neutral-300 p-6 col-span-3"
+            variants={{
+              hidden: { opacity: 0, y: 20 },
+              visible: { opacity: 1, y: 0 },
+            }}
+            transition={{ duration: 0.3 }}
+          >
             <h2 className="font-semibold text-lg mb-2">References</h2>
             {pageData.references.length > 0 ? (
               <ul className="list-disc list-inside text-sm text-neutral-700 space-y-1">
@@ -253,8 +333,8 @@ export default function ClassDetailPage() {
                 No references provided.
               </p>
             )}
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </div>
 
       {/* Edit Modal */}
