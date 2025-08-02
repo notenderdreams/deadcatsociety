@@ -37,7 +37,7 @@ import {
 } from "@/components/ui/dialog";
 import { eventSchema } from "@/modules/calendar/schemas";
 import { useAddEvent } from "@/modules/calendar/hooks/use-add-event"; // Import the new hook
-import { DatabaseEvent } from "@/types/models"; // Adjust import path if needed
+import { IEvent } from "@/types/models"; // Adjust import path if needed
 import type { TimeValue } from "react-aria-components";
 import type { TEventFormData } from "@/modules/calendar/schemas";
 
@@ -91,11 +91,8 @@ export function AddEventDialog({
       const startDateTime = new Date(values.date);
       startDateTime.setHours(values.startTime.hour, values.startTime.minute);
 
-      // Prepare data matching DatabaseEvent schema (excluding auto-generated fields)
-      const newEventData: Omit<
-        DatabaseEvent,
-        "id" | "created_at" | "updated_at"
-      > = {
+      // Prepare data matching IEvent schema (excluding auto-generated fields)
+      const newEventData: Omit<IEvent, "id" | "created_at" | "updated_at"> = {
         title: values.title,
         description: values.description || null, // Handle potential null/undefined
         date: startDateTime.toISOString(), // Ensure correct ISO format
