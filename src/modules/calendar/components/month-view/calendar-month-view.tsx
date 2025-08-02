@@ -39,7 +39,7 @@ export function CalendarMonthView({ events }: IProps) {
         ))}
       </div>
 
-      <div className="grid grid-cols-7 overflow-hidden">
+      <div className="grid grid-cols-7 min-w-4xl overflow-hidden">
         {cells.map((cell) => (
           <DayCell
             key={cell.date.toISOString()}

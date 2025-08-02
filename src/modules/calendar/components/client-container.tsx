@@ -45,7 +45,7 @@ export function ClientContainer({ view }: IProps) {
               <CalendarMonthView events={filteredEvents} />
             </div>
             {showAgenda && (
-              <div className="border w-2/3">
+              <div className="border w-1/3">
                 <CalendarAgendaView events={filteredEvents} />
               </div>
             )}
