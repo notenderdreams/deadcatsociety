@@ -77,7 +77,7 @@ export function ClassBlockItem({ log, onClick }: ClassBlockItemProps) {
         ease: [0.16, 1, 0.3, 1],
       }}
       ref={itemRef}
-      className="group relative overflow-hidden border-t border-[#3d3d3d] bg-white cursor-pointer"
+      className="group relative overflow-hidden border-t border-[#3d3d3d]  cursor-pointer"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onClick={onClick}

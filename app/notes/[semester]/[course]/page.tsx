@@ -100,7 +100,11 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-white text-black">
+    <div
+      className={`min-h-screen  text-black transition-all duration-300 ${
+        isAddModalOpen ? "blur-sm" : ""
+      }`}
+    >
       <div className="px-96 py-16 flex justify-between">
         <h1 className="text-4xl font-serif">{courseData.name}</h1>
         <Button className="bg-black text-white" onClick={handleAddClass}>

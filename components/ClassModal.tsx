@@ -106,7 +106,8 @@ export default function ClassModal({
       size="4xl"
       scrollBehavior="inside"
       classNames={{
-        base: "bg-neutral-500/10 backdrop-blur-xl shadow-md",
+        base: "bg-neutral-100/90 shadow-md",
+        // base: "bg-neutral-500/10 backdrop-blur-xl shadow-md",
         header: "border border-neutral-200",
         body: "py-6 border-l border-r border-neutral-200",
         footer: "border border-neutral-200",
