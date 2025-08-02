@@ -219,7 +219,7 @@ export function EventDetailsDialog({
         onClose={() => setIsDeleteDialogOpen(false)}
         size="xl"
         classNames={{
-          base: "bg-neutral-100 shadow-xl h-1/3 px-2 rounded-xl",
+          base: "bg-neutral-100 w-1/3 mt-64  shadow-xl h-1/3 px-2 rounded-xl",
           header: "border border-neutral-200 bg-neutral-200/50 mt-2 rounded-xl",
           body: "py-6 border-b-2 border-neutral-200",
           footer: "",

@@ -1,14 +1,15 @@
-// modules/calendar/hooks/use-delete-event.ts
+// src/modules/calendar/hooks/use-delete-event.ts
 "use client";
-
-import { useDatabaseStore } from "@/lib/store/useDatabaseStore";
+import { useDatabaseStore } from "@/lib/store/useDatabaseStore"; // Importing the store
 import { toast } from "sonner";
 
 export function useDeleteEvent() {
+  // Getting the setEvents function from the store
   const setEvents = useDatabaseStore((state) => state.setEvents);
 
   const deleteEvent = async (eventId: string) => {
     try {
+      // --- API Call ---
       const response = await fetch(`/api/events/${eventId}`, {
         method: "DELETE",
       });
@@ -17,13 +18,12 @@ export function useDeleteEvent() {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(
           errorData.error ||
-            `Failed to delete event. Status: ${response.status}`
+            `Failed to delete event. Status: ${response.status}`,
         );
       }
 
-      // Optimistic Update: Remove the deleted event from the Zustand store
       setEvents((prevEvents) =>
-        prevEvents.filter((event) => event.id !== eventId)
+        prevEvents.filter((event) => event.id !== eventId),
       );
 
       toast.success("Event deleted successfully!");
@@ -31,7 +31,7 @@ export function useDeleteEvent() {
     } catch (err) {
       console.error("Error deleting event:", err);
       toast.error(
-        err instanceof Error ? err.message : "Failed to delete event."
+        err instanceof Error ? err.message : "Failed to delete event.",
       );
     }
   };
