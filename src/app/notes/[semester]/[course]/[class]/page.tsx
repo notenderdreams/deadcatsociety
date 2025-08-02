@@ -176,10 +176,10 @@ export default function ClassDetailPage() {
   }
 
   return (
-    <div className="flex min-h-screen justify-center">
+    <div className="flex min-h-screen w-screen  justify-center">
       {/* Main Content */}
       <div
-        className={`bg-neutral-100 px-4 py-10 flex flex-col items-center transition-all duration-300 ${
+        className={`bg-neutral-100 px-4 py-10 flex flex-col items-center w-full transition-all duration-300 ${
           isEditModalOpen ? "blur-sm" : ""
         }`}
       >
@@ -370,14 +370,14 @@ export default function ClassDetailPage() {
       </div>
 
       {/* Edit Modal */}
-        <ClassModal
-          isOpen={isEditModalOpen}
-          onClose={() => !isSubmitting && setIsEditModalOpen(false)}
-          onSave={handleSaveEdit}
-          isEdit={true}
-          initialData={getInitialFormData()}
-          disabled={isSubmitting}
-        />
+      <ClassModal
+        isOpen={isEditModalOpen}
+        onClose={() => !isSubmitting && setIsEditModalOpen(false)}
+        onSave={handleSaveEdit}
+        isEdit={true}
+        initialData={getInitialFormData()}
+        disabled={isSubmitting}
+      />
     </div>
   );
 }
