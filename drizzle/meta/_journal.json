@@ -5,29 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1753626187702,
-      "tag": "0000_broad_hellion",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1753630624906,
-      "tag": "0001_dear_sentinel",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1753756889326,
-      "tag": "0002_brave_scarlet_spider",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1753822122527,
-      "tag": "0003_damp_electro",
+      "when": 1754115855665,
+      "tag": "0000_curly_wildside",
       "breakpoints": true
     }
   ]

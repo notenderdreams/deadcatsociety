@@ -1,1 +1,0 @@
-ALTER TABLE "semesters" ADD COLUMN "image" text;

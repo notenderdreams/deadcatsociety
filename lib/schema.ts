@@ -27,7 +27,7 @@ export const courses = pgTable("courses", {
 
 //  Class
 export const classes = pgTable("classes", {
-  id: uuid("id").primaryKey().notNull(),
+  id: uuid("id").defaultRandom().primaryKey().notNull(),
   course_id: text("course_id")
     .references(() => courses.id)
     .notNull(),

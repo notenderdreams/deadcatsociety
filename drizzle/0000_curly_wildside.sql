@@ -1,5 +1,5 @@
 CREATE TABLE "classes" (
-	"id" uuid PRIMARY KEY NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"course_id" text NOT NULL,
 	"title" text NOT NULL,
 	"description" text,
@@ -17,10 +17,21 @@ CREATE TABLE "courses" (
 	"updated_at" timestamp NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE "events" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"title" text NOT NULL,
+	"description" text,
+	"date" timestamp NOT NULL,
+	"type" text NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE "semesters" (
 	"id" integer PRIMARY KEY NOT NULL,
 	"name" text NOT NULL,
-	"is_active" boolean NOT NULL
+	"is_active" boolean NOT NULL,
+	"image" text
 );
 --> statement-breakpoint
 ALTER TABLE "classes" ADD CONSTRAINT "classes_course_id_courses_id_fk" FOREIGN KEY ("course_id") REFERENCES "public"."courses"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
