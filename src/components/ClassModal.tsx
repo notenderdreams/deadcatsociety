@@ -26,6 +26,7 @@ interface ClassModalProps {
   onSave: (data: EditFormData) => void;
   isEdit: boolean;
   initialData?: EditFormData;
+  disabled?: boolean;
 }
 
 const defaultFormData: EditFormData = {
@@ -43,6 +44,7 @@ export default function ClassModal({
   onSave,
   isEdit,
   initialData,
+  disabled = false,
 }: ClassModalProps) {
   const [editFormData, setEditFormData] =
     useState<EditFormData>(defaultFormData);
@@ -107,7 +109,6 @@ export default function ClassModal({
       scrollBehavior="inside"
       classNames={{
         base: "bg-neutral-100/90 shadow-md",
-        // base: "bg-neutral-500/10 backdrop-blur-xl shadow-md",
         header: "border border-neutral-200",
         body: "py-6 border-l border-r border-neutral-200",
         footer: "border border-neutral-200",
@@ -127,6 +128,7 @@ export default function ClassModal({
               <input
                 type="text"
                 value={editFormData.title}
+                disabled={disabled}
                 onChange={(e) =>
                   setEditFormData((prev) => ({
                     ...prev,
@@ -145,6 +147,7 @@ export default function ClassModal({
               </label>
               <textarea
                 value={editFormData.description}
+                disabled={disabled}
                 onChange={(e) =>
                   setEditFormData((prev) => ({
                     ...prev,
@@ -165,6 +168,7 @@ export default function ClassModal({
               <input
                 type="text"
                 value={editFormData.notes}
+                disabled={disabled}
                 onChange={(e) =>
                   setEditFormData((prev) => ({
                     ...prev,
@@ -185,6 +189,7 @@ export default function ClassModal({
                 <button
                   type="button"
                   onClick={() => handleAddArrayItem("topics")}
+                  disabled={disabled}
                   className="inline-flex items-center gap-1 text-sm text-black hover:bg-neutral-100 px-2 py-1 rounded"
                 >
                   <Plus size={14} />
@@ -197,6 +202,7 @@ export default function ClassModal({
                     <input
                       type="text"
                       value={topic}
+                      disabled={disabled}
                       onChange={(e) =>
                         handleArrayFieldChange("topics", index, e.target.value)
                       }
@@ -205,6 +211,7 @@ export default function ClassModal({
                     />
                     <button
                       type="button"
+                      disabled={disabled}
                       onClick={() => handleRemoveArrayItem("topics", index)}
                       className="p-2 text-red-500 hover:bg-red-50 rounded"
                     >
@@ -229,6 +236,7 @@ export default function ClassModal({
                 <button
                   type="button"
                   onClick={() => handleAddArrayItem("contributors")}
+                  disabled={disabled}
                   className="inline-flex items-center gap-1 text-sm text-black hover:bg-neutral-100 px-2 py-1 rounded"
                 >
                   <Plus size={14} />
@@ -241,6 +249,7 @@ export default function ClassModal({
                     <input
                       type="text"
                       value={contributor}
+                      disabled={disabled}
                       onChange={(e) =>
                         handleArrayFieldChange(
                           "contributors",
@@ -253,6 +262,7 @@ export default function ClassModal({
                     />
                     <button
                       type="button"
+                      disabled={disabled}
                       onClick={() =>
                         handleRemoveArrayItem("contributors", index)
                       }
@@ -279,6 +289,7 @@ export default function ClassModal({
                 <button
                   type="button"
                   onClick={() => handleAddArrayItem("references")}
+                  disabled={disabled}
                   className="inline-flex items-center gap-1 text-sm text-black hover:bg-neutral-100 px-2 py-1 rounded"
                 >
                   <Plus size={14} />
@@ -291,6 +302,7 @@ export default function ClassModal({
                     <input
                       type="text"
                       value={reference}
+                      disabled={disabled}
                       onChange={(e) =>
                         handleArrayFieldChange(
                           "references",
@@ -303,6 +315,7 @@ export default function ClassModal({
                     />
                     <button
                       type="button"
+                      disabled={disabled}
                       onClick={() => handleRemoveArrayItem("references", index)}
                       className="p-2 text-red-500 hover:bg-red-50 rounded"
                     >
@@ -323,15 +336,17 @@ export default function ClassModal({
           <Button
             variant="light"
             onClick={onClose}
+            disabled={disabled}
             className="text-neutral-600 hover:bg-neutral-100"
           >
             Cancel
           </Button>
           <Button
             onClick={handleSave}
+            disabled={disabled}
             className="bg-black text-white hover:bg-neutral-800 ml-2"
           >
-            {isEdit ? "Save Changes" : "Create Class"}
+            {disabled ? "Saving..." : isEdit ? "Save Changes" : "Create Class"}
           </Button>
         </ModalFooter>
       </ModalContent>

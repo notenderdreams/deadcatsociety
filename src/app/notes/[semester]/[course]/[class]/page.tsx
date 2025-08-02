@@ -2,10 +2,9 @@
 
 import { useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { Download, Pencil, ArrowLeft } from "lucide-react";
 import { Button } from "@heroui/react";
-import ClassNavPanel from "@/components/ClassNavPanel";
 import ClassModal from "@/components/ClassModal";
 import { useDatabaseStore } from "@/lib/store/useDatabaseStore";
 import {
@@ -371,7 +370,6 @@ export default function ClassDetailPage() {
       </div>
 
       {/* Edit Modal */}
-      <AnimatePresence>
         <ClassModal
           isOpen={isEditModalOpen}
           onClose={() => !isSubmitting && setIsEditModalOpen(false)}
@@ -380,7 +378,6 @@ export default function ClassDetailPage() {
           initialData={getInitialFormData()}
           disabled={isSubmitting}
         />
-      </AnimatePresence>
     </div>
   );
 }

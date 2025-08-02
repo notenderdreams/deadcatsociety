@@ -193,7 +193,7 @@ export default function App() {
         onClose={() => !isSubmitting && setIsAddModalOpen(false)}
         onSave={handleSaveNewClass}
         isEdit={false}
-        // disabled={isSubmitting}
+        disabled={isSubmitting}
       />
     </div>
   );
