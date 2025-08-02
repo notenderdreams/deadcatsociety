@@ -147,6 +147,13 @@ export default function App() {
       }`}
     >
       <div className="px-96 py-16 flex justify-between">
+        <Button
+          variant="bordered"
+          className="text-sm border-1 rounded-xl bg-neutral-200"
+          onClick={() => router.back()}
+        >
+          ← Back
+        </Button>
         <h1 className="text-4xl font-serif">{courseData.name}</h1>
         <Button
           className="bg-black text-white"
