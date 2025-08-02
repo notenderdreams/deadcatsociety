@@ -3,10 +3,11 @@ import { format, isSameDay, parseISO } from "date-fns";
 
 import { useCalendar } from "@/modules/calendar/contexts/calendar-context";
 import { DraggableEvent } from "@/modules/calendar/components/dnd/draggable-event";
-import { EventDetailsDialog } from "@/modules/calendar/components/dialogs/event-details-dialog";
+import { EventDetailsDialog } from "@/modules/calendar/components/dialogs/event-details-modal";
 import { cn } from "@/lib/utils";
 import type { VariantProps } from "class-variance-authority";
 import { IEvent } from "@/types/models";
+import { useState } from "react";
 
 const eventBadgeVariants = cva(
   "mx-1 flex size-auto h-6.5 select-none items-center justify-between gap-1.5 truncate whitespace-nowrap rounded-md border px-2 text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
@@ -26,7 +27,7 @@ const eventBadgeVariants = cva(
     defaultVariants: {
       type: "general",
     },
-  }
+  },
 );
 
 interface IProps {
@@ -34,11 +35,11 @@ interface IProps {
   cellDate: Date;
   className?: string;
 }
-
 export function MonthEventBadge({ event, cellDate, className }: IProps) {
   const { badgeVariant } = useCalendar();
-
   const eventDate = parseISO(event.date);
+  const [isOpen, setIsOpen] = useState(false);
+
   if (!isSameDay(cellDate, eventDate)) return null;
 
   const type = event.type as VariantProps<typeof eventBadgeVariants>["type"];
@@ -52,30 +53,39 @@ export function MonthEventBadge({ event, cellDate, className }: IProps) {
   };
 
   return (
-    <DraggableEvent event={event}>
-      <EventDetailsDialog event={event}>
-        <div
-          role="button"
-          tabIndex={0}
-          className={eventBadgeClasses}
-          onKeyDown={handleKeyDown}
-        >
-          <div className="flex items-center gap-1.5 truncate">
-            {["mixed", "dot"].includes(badgeVariant) && (
-              <svg
-                width="8"
-                height="8"
-                viewBox="0 0 8 8"
-                className="event-dot shrink-0"
-              >
-                <circle cx="4" cy="4" r="4" />
-              </svg>
-            )}
-            <p className="flex-1 truncate font-semibold">{event.title}</p>
+    <>
+      <div className={`transition-all ${isOpen ? "blur-sm" : ""}`}>
+        <DraggableEvent event={event}>
+          <div
+            role="button"
+            tabIndex={0}
+            className={eventBadgeClasses}
+            onClick={() => setIsOpen(true)}
+            onKeyDown={handleKeyDown}
+          >
+            <div className="flex items-center gap-1.5 truncate">
+              {["mixed", "dot"].includes(badgeVariant) && (
+                <svg
+                  width="8"
+                  height="8"
+                  viewBox="0 0 8 8"
+                  className="event-dot shrink-0"
+                >
+                  <circle cx="4" cy="4" r="4" />
+                </svg>
+              )}
+              <p className="flex-1 truncate font-semibold">{event.title}</p>
+            </div>
+            <span>{format(eventDate, "h:mm a")}</span>
           </div>
-          <span>{format(eventDate, "h:mm a")}</span>
-        </div>
-      </EventDetailsDialog>
-    </DraggableEvent>
+        </DraggableEvent>
+      </div>
+
+      <EventDetailsDialog
+        event={event}
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+      />
+    </>
   );
 }

@@ -5,7 +5,7 @@ import { Text } from "lucide-react";
 
 import { useCalendar } from "@/modules/calendar/contexts/calendar-context";
 
-import { EventDetailsDialog } from "@/modules/calendar/components/dialogs/event-details-dialog";
+import { EventDetailsDialog } from "@/modules/calendar/components/dialogs/event-details-modal";
 
 import type { IEvent } from "@/types/models";
 import type { VariantProps } from "class-variance-authority";
@@ -28,7 +28,7 @@ const agendaEventCardVariants = cva(
     defaultVariants: {
       type: "general",
     },
-  }
+  },
 );
 
 interface IProps {
