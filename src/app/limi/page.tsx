@@ -7,30 +7,25 @@ import React, { useState, useRef, useEffect, FormEvent } from "react";
 import { TextShimmer } from "@/components/ui/text-shimmer";
 import { gsap } from "gsap";
 
+type Source = {
+  title: string;
+  page_number: number;
+  content_preview: string;
+  confidence: number;
+  note_id: string;
+  match_type: string;
+};
+
 interface Message {
   id: number;
   text: string;
   sender: "user" | "ai";
-  sources?: Array<{
-    title: string;
-    page_number: number;
-    content_preview: string;
-    confidence: number;
-    note_id: string;
-    match_type: string;
-  }>;
+  sources?: Source[];
 }
 
 interface ApiResponse {
   answer: string;
-  sources: Array<{
-    title: string;
-    page_number: number;
-    content_preview: string;
-    confidence: number;
-    note_id: string;
-    match_type: string;
-  }>;
+  sources: Source[];
   total_sources_found: number;
 }
 
@@ -49,17 +44,13 @@ const Page: React.FC = () => {
   const imagesContainerRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
 
-  // Initial animations on mount
   useEffect(() => {
     const tl = gsap.timeline();
-
-    // Initial fade in for background image
     tl.fromTo(
       limiBgRef.current,
       { opacity: 0 },
-      { opacity: 1, duration: 0.4, ease: "power2.out" }
+      { opacity: 1, duration: 0.4, ease: "power2.out" },
     )
-      // Initial blur in for process image and slide up for input container (simultaneously)
       .fromTo(
         limiProcRef.current,
         {
@@ -74,7 +65,7 @@ const Page: React.FC = () => {
           duration: 0.4,
           ease: "power2.out",
         },
-        "-=0.2"
+        "-=0.2",
       )
       .fromTo(
         inputContainerRef.current,
@@ -88,11 +79,10 @@ const Page: React.FC = () => {
           duration: 0.4,
           ease: "power2.out",
         },
-        "<" // Start at the same time as previous animation
+        "<",
       );
   }, []);
 
-  // Animation for messages
   useEffect(() => {
     if (messages.length > 0) {
       const messageElements = document.querySelectorAll("[data-message-index]");
@@ -110,14 +100,14 @@ const Page: React.FC = () => {
             y: 0,
             duration: 0.5,
             ease: "power2.out",
-          }
+          },
         );
       }
     }
   }, [messages]);
 
   const fetchAnswerFromLimi = async (
-    question: string
+    question: string,
   ): Promise<ApiResponse> => {
     try {
       const response = await fetch("/api/limi/ask", {
@@ -150,20 +140,18 @@ const Page: React.FC = () => {
         setShowImages(false);
         setIsTransitioning(true);
 
-        // GSAP animation for transitioning images up
         gsap.to(imagesContainerRef.current, {
           y: "-100%",
           duration: 1,
           ease: "power2.inOut",
         });
 
-        // Show messages container with animation
         if (messagesContainerRef.current) {
           gsap.set(messagesContainerRef.current, { display: "block" });
           gsap.fromTo(
             messagesContainerRef.current,
             { opacity: 0, y: 20 },
-            { opacity: 1, y: 0, duration: 0.6, ease: "power2.out", delay: 0.3 }
+            { opacity: 1, y: 0, duration: 0.6, ease: "power2.out", delay: 0.3 },
           );
         }
       }
@@ -178,7 +166,6 @@ const Page: React.FC = () => {
       const currentQuestion = inputValue;
       setInputValue("");
 
-      // Add shimmer placeholder
       const loadingMessage: Message = {
         id: Date.now() + 0.5,
         text: "Searching...",
@@ -189,26 +176,20 @@ const Page: React.FC = () => {
 
       try {
         const apiResponse = await fetchAnswerFromLimi(currentQuestion);
-
         const aiResponse: Message = {
           id: Date.now() + 1,
           text: apiResponse.answer,
           sender: "ai",
           sources: apiResponse.sources,
         };
-
-        // Replace shimmer message with actual response
         setMessages((prev) => [...prev.slice(0, -1), aiResponse]);
       } catch (error) {
         console.error("API call failed:", error);
-
         const errorResponse: Message = {
           id: Date.now() + 1,
           text: "Sorry, I encountered an error while processing your request. Please try again.",
           sender: "ai",
         };
-
-        // Replace shimmer message with error response
         setMessages((prev) => [...prev.slice(0, -1), errorResponse]);
       } finally {
         setIsLoading(false);
@@ -220,7 +201,7 @@ const Page: React.FC = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const renderSources = (sources?: Array<any>) => {
+  const renderSources = (sources?: Source[]) => {
     if (!sources || sources.length === 0) return null;
 
     return (
@@ -256,7 +237,6 @@ const Page: React.FC = () => {
 
   return (
     <div className="h-screen relative overflow-hidden">
-      {/* Images that move up */}
       <div
         ref={imagesContainerRef}
         className="flex justify-center items-center h-1/2 relative"
@@ -278,7 +258,6 @@ const Page: React.FC = () => {
         />
       </div>
 
-      {/* Chat Messages */}
       <div
         ref={messagesContainerRef}
         className="absolute top-0 left-0 right-0 bottom-52 overflow-y-auto p-6"
@@ -327,7 +306,6 @@ const Page: React.FC = () => {
         </div>
       </div>
 
-      {/* Input Field */}
       <div
         ref={inputContainerRef}
         className="absolute bg-white hover:bg-neutral-100 h-32 w-2/5 rounded-4xl left-1/2 -translate-x-1/2 -translate-y-1/2 bottom-10 flex items-center px-6 border-3 border-neutral-300"
