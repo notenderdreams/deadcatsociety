@@ -3,19 +3,19 @@ import {
   DatabaseClass,
   DatabaseCourse,
   DatabaseSemester,
-  DatabaseEvent,
+  IEvent,
   DatabaseStructure,
 } from "@/types/models";
 
 interface DatabaseState {
   data: DatabaseStructure;
-  events: DatabaseEvent[];
+  events: IEvent[];
   isLoading: boolean;
   error: string | null;
   isInitialized: boolean;
   eventsInitialized: boolean;
   setData: (newData: DatabaseStructure) => void;
-  setEvents: (events: DatabaseEvent[]) => void;
+  setEvents: (events: IEvent[]) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
   setInitialized: (initialized: boolean) => void;
@@ -27,7 +27,7 @@ interface DatabaseState {
   getSemesterById: (id: number) => DatabaseSemester | undefined;
   getCourseById: (id: string) => DatabaseCourse | undefined;
   getClassById: (id: string) => DatabaseClass | undefined;
-  getEventById: (id: string) => DatabaseEvent | undefined;
+  getEventById: (id: string) => IEvent | undefined;
   getCoursesForSemester: (semesterId: number) => DatabaseCourse[];
   getClassesForCourse: (courseId: string) => DatabaseClass[];
 }
@@ -79,7 +79,7 @@ export const useDatabaseStore = create<DatabaseState>()((set, get) => ({
         for (const course of semester.courses) {
           if (course.classes) {
             const classIndex = course.classes.findIndex(
-              (c) => c.id === classId
+              (c) => c.id === classId,
             );
             if (classIndex !== -1) {
               course.classes[classIndex] = {
@@ -105,7 +105,7 @@ export const useDatabaseStore = create<DatabaseState>()((set, get) => ({
         for (const course of semester.courses) {
           if (course.classes) {
             const classIndex = course.classes.findIndex(
-              (c) => c.id === classId
+              (c) => c.id === classId,
             );
             if (classIndex !== -1) {
               course.classes.splice(classIndex, 1);
