@@ -4,8 +4,8 @@
 @plugin '../lib/hero.ts';
 
 @font-face {
-  font-family: 'FreightDispPro';
-  src: url('/fonts/FreightDispProBold-Italic.ttf') format('truetype');
+  font-family: "FreightDispPro";
+  src: url("/fonts/FreightDispProBold-Italic.ttf") format("truetype");
   font-weight: bold;
   font-style: italic;
   font-display: swap;
@@ -14,7 +14,7 @@
 :root {
   --background: #f5f5f5;
   --foreground: #171717;
-  --font-freight: 'FreightDispPro', serif;
+  --font-freight: "FreightDispPro", serif;
   --sidebar: hsl(0 0% 98%);
   --sidebar-foreground: hsl(240 5.3% 26.1%);
   --sidebar-primary: hsl(240 5.9% 10%);
@@ -38,13 +38,6 @@
   --color-sidebar-primary: var(--sidebar-primary);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar: var(--sidebar);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
 }
 
 body {
