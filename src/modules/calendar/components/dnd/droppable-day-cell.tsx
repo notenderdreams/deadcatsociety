@@ -30,7 +30,7 @@ export function DroppableDayCell({ cell, children }: DroppableDayCellProps) {
 
         const eventDurationMs = differenceInMilliseconds(
           eventEndDate,
-          eventStartDate
+          eventStartDate,
         );
 
         const newStartDate = new Date(cell.date);
@@ -38,7 +38,7 @@ export function DroppableDayCell({ cell, children }: DroppableDayCellProps) {
           eventStartDate.getHours(),
           eventStartDate.getMinutes(),
           eventStartDate.getSeconds(),
-          eventStartDate.getMilliseconds()
+          eventStartDate.getMilliseconds(),
         );
         const newEndDate = new Date(newStartDate.getTime() + eventDurationMs);
 
@@ -54,7 +54,7 @@ export function DroppableDayCell({ cell, children }: DroppableDayCellProps) {
         canDrop: monitor.canDrop(),
       }),
     }),
-    [cell.date, updateEvent]
+    [cell.date, updateEvent],
   );
 
   return (

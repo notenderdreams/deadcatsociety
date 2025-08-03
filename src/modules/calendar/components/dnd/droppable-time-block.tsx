@@ -36,7 +36,7 @@ export function DroppableTimeBlock({
 
         const eventDurationMs = differenceInMilliseconds(
           eventEndDate,
-          eventStartDate
+          eventStartDate,
         );
 
         const newStartDate = new Date(date);
@@ -55,7 +55,7 @@ export function DroppableTimeBlock({
         canDrop: monitor.canDrop(),
       }),
     }),
-    [date, hour, minute, updateEvent]
+    [date, hour, minute, updateEvent],
   );
 
   return (
