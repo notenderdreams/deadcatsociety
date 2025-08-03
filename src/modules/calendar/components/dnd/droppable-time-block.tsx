@@ -31,8 +31,8 @@ export function DroppableTimeBlock({
       drop: (item: { event: IEvent }) => {
         const droppedEvent = item.event;
 
-        const eventStartDate = parseISO(droppedEvent.startDate);
-        const eventEndDate = parseISO(droppedEvent.endDate);
+        const eventStartDate = parseISO(droppedEvent.date);
+        const eventEndDate = parseISO(droppedEvent.date);
 
         const eventDurationMs = differenceInMilliseconds(
           eventEndDate,
@@ -45,8 +45,7 @@ export function DroppableTimeBlock({
 
         updateEvent({
           ...droppedEvent,
-          startDate: newStartDate.toISOString(),
-          endDate: newEndDate.toISOString(),
+          date: newStartDate.toISOString(),
         });
 
         return { moved: true };

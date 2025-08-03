@@ -8,7 +8,8 @@ import { useUpdateEvent } from "@/modules/calendar/hooks/use-update-event";
 import { cn } from "@/lib/utils";
 import { ItemTypes } from "@/modules/calendar/components/dnd/draggable-event";
 
-import type { IEvent, ICalendarCell } from "@/modules/calendar/interfaces";
+import type { ICalendarCell } from "@/modules/calendar/interfaces";
+import { IEvent } from "@/types/models";
 
 interface DroppableDayCellProps {
   cell: ICalendarCell;
