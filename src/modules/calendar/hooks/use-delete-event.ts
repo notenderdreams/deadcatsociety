@@ -1,15 +1,13 @@
-// src/modules/calendar/hooks/use-delete-event.ts
 "use client";
-import { useDatabaseStore } from "@/lib/store/useDatabaseStore"; // Importing the store
+
+import { useCalendar } from "@/modules/calendar/contexts/calendar-context";
 import { toast } from "sonner";
 
 export function useDeleteEvent() {
-  // Getting the setEvents function from the store
-  const setEvents = useDatabaseStore((state) => state.setEvents);
+  const { setLocalEvents } = useCalendar();
 
   const deleteEvent = async (eventId: string) => {
     try {
-      // --- API Call ---
       const response = await fetch(`/api/events/${eventId}`, {
         method: "DELETE",
       });
@@ -22,7 +20,8 @@ export function useDeleteEvent() {
         );
       }
 
-      setEvents((prevEvents) =>
+      // Update local state after successful deletion
+      setLocalEvents((prevEvents) =>
         prevEvents.filter((event) => event.id !== eventId),
       );
 
